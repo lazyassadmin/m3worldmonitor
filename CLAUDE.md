@@ -54,41 +54,57 @@ Real-time global intelligence dashboard. TypeScript SPA (Vite, no UI framework) 
 
 ## Development Commands
 
+A `Justfile` is the single entry point for all common tasks. Run `just` or `just --list` to see everything. The recipes below are the most frequently used.
+
 ```bash
-# Install everything (buf CLI, sebuf plugins, npm deps, Playwright)
-make install
+# Setup
+just install             # everything: buf CLI, sebuf plugins, npm deps, Playwright
+just deps                # npm install only
 
 # Dev server
-npm run dev              # full variant (default)
-npm run dev:tech         # tech variant
-npm run dev:finance      # finance variant
+just dev                 # full variant (default)
+just dev-tech            # tech variant
+just dev-finance         # finance variant
 
-# Type checking (always run before committing)
-npm run typecheck        # src/
-npm run typecheck:api    # api/ (separate tsconfig)
-npm run typecheck:all    # both
+# Formatting (Biome — enabled, indentStyle: tab, lineWidth: 100)
+just format              # rewrite files in place
+just format-check        # CI-safe dry-run (no writes)
+npm run format           # same as just format
+npm run format:check     # same as just format-check
+
+# Type checking
+just typecheck-all       # src/ + api/ together
+npm run typecheck        # src/ only
+npm run typecheck:api    # api/ only (separate tsconfig)
 
 # Linting
-npm run lint             # Biome lint (src, server, api, tests, e2e, scripts)
-npm run lint:fix         # Auto-fix
-npm run lint:boundaries  # Architectural boundary enforcement
-npm run lint:md          # Markdown lint
+just lint                # Biome lint
+just lint-fix            # Biome lint + auto-fix
+just lint-boundaries     # Architectural boundary enforcement
+just lint-md             # Markdown lint
+just lint-all            # All lint checks combined
+
+# Full quality gate (format-check + typecheck + lint + boundaries)
+just check
 
 # Testing
-npm run test:data        # Unit/integration tests (node:test runner)
-npm run test:sidecar     # Sidecar + API handler tests
-npm run test:e2e         # Playwright E2E (all variants)
-npm run test:convex      # Convex unit tests (vitest)
+just test                # Unit/integration tests (node:test runner)
+just test-sidecar        # Sidecar + API handler tests
+just test-convex         # Convex unit tests (vitest)
+just test-e2e            # Playwright E2E (all variants)
+just test-visual         # Visual regression (golden screenshots)
+just test-all            # Unit + sidecar + convex (fast suite)
 
 # Build
-npm run build            # full variant
-npm run build:tech
-npm run build:finance
+just build               # full variant
+just build-tech
+just build-finance
+just build-all           # all variants
 
-# Proto code generation (requires buf + sebuf plugins via make install)
-make generate            # Regenerate src/generated/ and docs/api/
-make lint                # Lint proto files
-make breaking            # Check for breaking changes vs main
+# Proto code generation (requires buf + sebuf plugins)
+just generate            # Regenerate src/generated/ and docs/api/
+just proto-lint          # Lint proto files
+just proto-breaking      # Check for breaking changes vs main
 ```
 
 ---
