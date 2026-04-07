@@ -14,31 +14,40 @@
  * Strip C-style comments and trailing commas from a JSON-like string.
  */
 export function cleanJsonText(text) {
-  return text
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\/\/[^\n]*/g, '')
-    .replace(/,(\s*[}\]])/g, '$1')
-    .trim();
+	return text
+		.replace(/\/\*[\s\S]*?\*\//g, "")
+		.replace(/\/\/[^\n]*/g, "")
+		.replace(/,(\s*[}\]])/g, "$1")
+		.trim();
 }
 
 function extractFirstDelimited(text, open, close) {
-  const cleaned = cleanJsonText(text);
-  const start = cleaned.indexOf(open);
-  if (start === -1) return '';
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < cleaned.length; i++) {
-    const char = cleaned[i];
-    if (escaped) { escaped = false; continue; }
-    if (char === '\\') { escaped = true; continue; }
-    if (char === '"') { inString = !inString; continue; }
-    if (inString) continue;
-    if (char === open) depth++;
-    if (char === close && --depth === 0) return cleaned.slice(start, i + 1);
-  }
-  return cleaned.slice(start);
+	const cleaned = cleanJsonText(text);
+	const start = cleaned.indexOf(open);
+	if (start === -1) return "";
+	let depth = 0;
+	let inString = false;
+	let escaped = false;
+	for (let i = start; i < cleaned.length; i++) {
+		const char = cleaned[i];
+		if (escaped) {
+			escaped = false;
+			continue;
+		}
+		if (char === "\\") {
+			escaped = true;
+			continue;
+		}
+		if (char === '"') {
+			inString = !inString;
+			continue;
+		}
+		if (inString) continue;
+		if (char === open) depth++;
+		if (char === close && --depth === 0) return cleaned.slice(start, i + 1);
+	}
+	return cleaned.slice(start);
 }
 
-export const extractFirstJsonObject = (text) => extractFirstDelimited(text, '{', '}');
-export const extractFirstJsonArray  = (text) => extractFirstDelimited(text, '[', ']');
+export const extractFirstJsonObject = (text) => extractFirstDelimited(text, "{", "}");
+export const extractFirstJsonArray = (text) => extractFirstDelimited(text, "[", "]");

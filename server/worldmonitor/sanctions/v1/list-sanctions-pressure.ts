@@ -1,13 +1,13 @@
 import type {
-  ListSanctionsPressureRequest,
-  ListSanctionsPressureResponse,
-  SanctionsServiceHandler,
-  ServerContext,
-} from '../../../../src/generated/server/worldmonitor/sanctions/v1/service_server';
+	ListSanctionsPressureRequest,
+	ListSanctionsPressureResponse,
+	SanctionsServiceHandler,
+	ServerContext,
+} from "../../../../src/generated/server/worldmonitor/sanctions/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
+import { getCachedJson } from "../../../_shared/redis";
 
-const REDIS_CACHE_KEY = 'sanctions:pressure:v1';
+const REDIS_CACHE_KEY = "sanctions:pressure:v1";
 const DEFAULT_MAX_ITEMS = 25;
 const MAX_ITEMS_LIMIT = 60;
 
@@ -16,40 +16,42 @@ const MAX_ITEMS_LIMIT = 60;
 // data from Redis only (gold standard: Vercel reads, Railway writes).
 
 function clampMaxItems(value: number): number {
-  if (!Number.isFinite(value) || value <= 0) return DEFAULT_MAX_ITEMS;
-  return Math.min(Math.max(Math.trunc(value), 1), MAX_ITEMS_LIMIT);
+	if (!Number.isFinite(value) || value <= 0) return DEFAULT_MAX_ITEMS;
+	return Math.min(Math.max(Math.trunc(value), 1), MAX_ITEMS_LIMIT);
 }
 
 function emptyResponse(): ListSanctionsPressureResponse {
-  return {
-    entries: [],
-    countries: [],
-    programs: [],
-    fetchedAt: '0',
-    datasetDate: '0',
-    totalCount: 0,
-    sdnCount: 0,
-    consolidatedCount: 0,
-    newEntryCount: 0,
-    vesselCount: 0,
-    aircraftCount: 0,
-  };
+	return {
+		entries: [],
+		countries: [],
+		programs: [],
+		fetchedAt: "0",
+		datasetDate: "0",
+		totalCount: 0,
+		sdnCount: 0,
+		consolidatedCount: 0,
+		newEntryCount: 0,
+		vesselCount: 0,
+		aircraftCount: 0,
+	};
 }
 
-export const listSanctionsPressure: SanctionsServiceHandler['listSanctionsPressure'] = async (
-  _ctx: ServerContext,
-  req: ListSanctionsPressureRequest,
+export const listSanctionsPressure: SanctionsServiceHandler["listSanctionsPressure"] = async (
+	_ctx: ServerContext,
+	req: ListSanctionsPressureRequest,
 ): Promise<ListSanctionsPressureResponse> => {
-  const maxItems = clampMaxItems(req.maxItems);
-  try {
-    const data = await getCachedJson(REDIS_CACHE_KEY, true) as ListSanctionsPressureResponse & { _state?: unknown } | null;
-    if (!data?.totalCount) return emptyResponse();
-    const { _state: _discarded, ...rest } = data;
-    return {
-      ...rest,
-      entries: (data.entries ?? []).slice(0, maxItems),
-    };
-  } catch {
-    return emptyResponse();
-  }
+	const maxItems = clampMaxItems(req.maxItems);
+	try {
+		const data = (await getCachedJson(REDIS_CACHE_KEY, true)) as
+			| (ListSanctionsPressureResponse & { _state?: unknown })
+			| null;
+		if (!data?.totalCount) return emptyResponse();
+		const { _state: _discarded, ...rest } = data;
+		return {
+			...rest,
+			entries: (data.entries ?? []).slice(0, maxItems),
+		};
+	} catch {
+		return emptyResponse();
+	}
 };

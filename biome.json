@@ -9,7 +9,9 @@
 		"ignoreUnknown": true
 	},
 	"formatter": {
-		"enabled": false
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineWidth": 100
 	},
 	"overrides": [
 		{

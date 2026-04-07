@@ -1,23 +1,23 @@
 import type {
-  ResilienceServiceHandler,
-  ServerContext,
-  GetResilienceRankingRequest,
-  GetResilienceRankingResponse,
-} from '../../../../src/generated/server/worldmonitor/resilience/v1/service_server';
+	ResilienceServiceHandler,
+	ServerContext,
+	GetResilienceRankingRequest,
+	GetResilienceRankingResponse,
+} from "../../../../src/generated/server/worldmonitor/resilience/v1/service_server";
 
-import { getCachedJson, runRedisPipeline } from '../../../_shared/redis';
+import { getCachedJson, runRedisPipeline } from "../../../_shared/redis";
 import {
-  GREY_OUT_COVERAGE_THRESHOLD,
-  RESILIENCE_RANKING_CACHE_KEY,
-  RESILIENCE_RANKING_CACHE_TTL_SECONDS,
-  buildRankingItem,
-  getCachedResilienceScores,
-  listScorableCountries,
-  sortRankingItems,
-  warmMissingResilienceScores,
-} from './_shared';
+	GREY_OUT_COVERAGE_THRESHOLD,
+	RESILIENCE_RANKING_CACHE_KEY,
+	RESILIENCE_RANKING_CACHE_TTL_SECONDS,
+	buildRankingItem,
+	getCachedResilienceScores,
+	listScorableCountries,
+	sortRankingItems,
+	warmMissingResilienceScores,
+} from "./_shared";
 
-const RESILIENCE_RANKING_META_KEY = 'seed-meta:resilience:ranking';
+const RESILIENCE_RANKING_META_KEY = "seed-meta:resilience:ranking";
 const RESILIENCE_RANKING_META_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 // How many missing countries to score synchronously per ranking request.
@@ -29,40 +29,62 @@ const RESILIENCE_RANKING_META_TTL_SECONDS = 7 * 24 * 60 * 60;
 // 200 covers the full static index (~130-180 countries) in a single cold-cache pass.
 const SYNC_WARM_LIMIT = 200;
 
-export const getResilienceRanking: ResilienceServiceHandler['getResilienceRanking'] = async (
-  _ctx: ServerContext,
-  _req: GetResilienceRankingRequest,
+export const getResilienceRanking: ResilienceServiceHandler["getResilienceRanking"] = async (
+	_ctx: ServerContext,
+	_req: GetResilienceRankingRequest,
 ): Promise<GetResilienceRankingResponse> => {
-  const cached = await getCachedJson(RESILIENCE_RANKING_CACHE_KEY) as GetResilienceRankingResponse | null;
-  if (cached != null && (cached.items.length > 0 || (cached.greyedOut?.length ?? 0) > 0)) return cached;
+	const cached = (await getCachedJson(
+		RESILIENCE_RANKING_CACHE_KEY,
+	)) as GetResilienceRankingResponse | null;
+	if (cached != null && (cached.items.length > 0 || (cached.greyedOut?.length ?? 0) > 0))
+		return cached;
 
-  const countryCodes = await listScorableCountries();
-  if (countryCodes.length === 0) return { items: [], greyedOut: [] };
+	const countryCodes = await listScorableCountries();
+	if (countryCodes.length === 0) return { items: [], greyedOut: [] };
 
-  let cachedScores = await getCachedResilienceScores(countryCodes);
-  const missing = countryCodes.filter((countryCode) => !cachedScores.has(countryCode));
-  if (missing.length > 0) {
-    try {
-      await warmMissingResilienceScores(missing.slice(0, SYNC_WARM_LIMIT));
-      cachedScores = await getCachedResilienceScores(countryCodes);
-    } catch (err) {
-      console.warn('[resilience] ranking warmup failed:', err);
-    }
-  }
+	let cachedScores = await getCachedResilienceScores(countryCodes);
+	const missing = countryCodes.filter((countryCode) => !cachedScores.has(countryCode));
+	if (missing.length > 0) {
+		try {
+			await warmMissingResilienceScores(missing.slice(0, SYNC_WARM_LIMIT));
+			cachedScores = await getCachedResilienceScores(countryCodes);
+		} catch (err) {
+			console.warn("[resilience] ranking warmup failed:", err);
+		}
+	}
 
-  const allItems = countryCodes.map((countryCode) => buildRankingItem(countryCode, cachedScores.get(countryCode)));
-  const response: GetResilienceRankingResponse = {
-    items: sortRankingItems(allItems.filter((item) => item.overallCoverage >= GREY_OUT_COVERAGE_THRESHOLD)),
-    greyedOut: allItems.filter((item) => item.overallCoverage < GREY_OUT_COVERAGE_THRESHOLD),
-  };
+	const allItems = countryCodes.map((countryCode) =>
+		buildRankingItem(countryCode, cachedScores.get(countryCode)),
+	);
+	const response: GetResilienceRankingResponse = {
+		items: sortRankingItems(
+			allItems.filter((item) => item.overallCoverage >= GREY_OUT_COVERAGE_THRESHOLD),
+		),
+		greyedOut: allItems.filter((item) => item.overallCoverage < GREY_OUT_COVERAGE_THRESHOLD),
+	};
 
-  const stillMissing = countryCodes.filter((countryCode) => !cachedScores.has(countryCode));
-  if (stillMissing.length === 0) {
-    await runRedisPipeline([
-      ['SET', RESILIENCE_RANKING_CACHE_KEY, JSON.stringify(response), 'EX', RESILIENCE_RANKING_CACHE_TTL_SECONDS],
-      ['SET', RESILIENCE_RANKING_META_KEY, JSON.stringify({ fetchedAt: Date.now(), count: response.items.length + response.greyedOut.length }), 'EX', RESILIENCE_RANKING_META_TTL_SECONDS],
-    ]);
-  }
+	const stillMissing = countryCodes.filter((countryCode) => !cachedScores.has(countryCode));
+	if (stillMissing.length === 0) {
+		await runRedisPipeline([
+			[
+				"SET",
+				RESILIENCE_RANKING_CACHE_KEY,
+				JSON.stringify(response),
+				"EX",
+				RESILIENCE_RANKING_CACHE_TTL_SECONDS,
+			],
+			[
+				"SET",
+				RESILIENCE_RANKING_META_KEY,
+				JSON.stringify({
+					fetchedAt: Date.now(),
+					count: response.items.length + response.greyedOut.length,
+				}),
+				"EX",
+				RESILIENCE_RANKING_META_TTL_SECONDS,
+			],
+		]);
+	}
 
-  return response;
+	return response;
 };

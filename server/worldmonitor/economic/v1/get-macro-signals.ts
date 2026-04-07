@@ -4,44 +4,44 @@
  */
 
 import type {
-  ServerContext,
-  GetMacroSignalsRequest,
-  GetMacroSignalsResponse,
-} from '../../../../src/generated/server/worldmonitor/economic/v1/service_server';
+	ServerContext,
+	GetMacroSignalsRequest,
+	GetMacroSignalsResponse,
+} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
+import { getCachedJson } from "../../../_shared/redis";
 
-const SEED_CACHE_KEY = 'economic:macro-signals:v1';
+const SEED_CACHE_KEY = "economic:macro-signals:v1";
 
 function buildFallbackResult(): GetMacroSignalsResponse {
-  return {
-    timestamp: new Date().toISOString(),
-    verdict: 'UNKNOWN',
-    bullishCount: 0,
-    totalCount: 0,
-    signals: {
-      liquidity: { status: 'UNKNOWN', sparkline: [] },
-      flowStructure: { status: 'UNKNOWN' },
-      macroRegime: { status: 'UNKNOWN' },
-      technicalTrend: { status: 'UNKNOWN', sparkline: [] },
-      hashRate: { status: 'UNKNOWN' },
-      priceMomentum: { status: 'UNKNOWN' },
-      fearGreed: { status: 'UNKNOWN', history: [] },
-    },
-    meta: { qqqSparkline: [] },
-    unavailable: true,
-  };
+	return {
+		timestamp: new Date().toISOString(),
+		verdict: "UNKNOWN",
+		bullishCount: 0,
+		totalCount: 0,
+		signals: {
+			liquidity: { status: "UNKNOWN", sparkline: [] },
+			flowStructure: { status: "UNKNOWN" },
+			macroRegime: { status: "UNKNOWN" },
+			technicalTrend: { status: "UNKNOWN", sparkline: [] },
+			hashRate: { status: "UNKNOWN" },
+			priceMomentum: { status: "UNKNOWN" },
+			fearGreed: { status: "UNKNOWN", history: [] },
+		},
+		meta: { qqqSparkline: [] },
+		unavailable: true,
+	};
 }
 
 export async function getMacroSignals(
-  _ctx: ServerContext,
-  _req: GetMacroSignalsRequest,
+	_ctx: ServerContext,
+	_req: GetMacroSignalsRequest,
 ): Promise<GetMacroSignalsResponse> {
-  try {
-    const result = await getCachedJson(SEED_CACHE_KEY, true) as GetMacroSignalsResponse | null;
-    if (result && !result.unavailable && result.totalCount > 0) return result;
-    return buildFallbackResult();
-  } catch {
-    return buildFallbackResult();
-  }
+	try {
+		const result = (await getCachedJson(SEED_CACHE_KEY, true)) as GetMacroSignalsResponse | null;
+		if (result && !result.unavailable && result.totalCount > 0) return result;
+		return buildFallbackResult();
+	} catch {
+		return buildFallbackResult();
+	}
 }

@@ -7,19 +7,19 @@
  * is not configured or ConvexClient is unavailable.
  */
 
-import { getConvexClient, getConvexApi } from './convex-client';
+import { getConvexClient, getConvexApi } from "./convex-client";
 
 export interface EntitlementState {
-  planKey: string;
-  features: {
-    tier: number;
-    apiAccess: boolean;
-    apiRateLimit: number;
-    maxDashboards: number;
-    prioritySupport: boolean;
-    exportFormats: string[];
-  };
-  validUntil: number;
+	planKey: string;
+	features: {
+		tier: number;
+		apiAccess: boolean;
+		apiRateLimit: number;
+		maxDashboards: number;
+		prioritySupport: boolean;
+		exportFormats: string[];
+	};
+	validUntil: number;
 }
 
 // Module-level state
@@ -34,39 +34,39 @@ let unsubscribeFn: (() => void) | null = null;
  * Failures are logged but never thrown (dashboard must not break).
  */
 export async function initEntitlementSubscription(_userId?: string): Promise<void> {
-  if (initialized) return;
+	if (initialized) return;
 
-  try {
-    const client = await getConvexClient();
-    if (!client) {
-      console.log('[entitlements] No VITE_CONVEX_URL — skipping Convex subscription');
-      return;
-    }
+	try {
+		const client = await getConvexClient();
+		if (!client) {
+			console.log("[entitlements] No VITE_CONVEX_URL — skipping Convex subscription");
+			return;
+		}
 
-    const api = await getConvexApi();
-    if (!api) {
-      console.log('[entitlements] Could not load Convex API — skipping subscription');
-      return;
-    }
+		const api = await getConvexApi();
+		if (!api) {
+			console.log("[entitlements] Could not load Convex API — skipping subscription");
+			return;
+		}
 
-    const watch = client.onUpdate(
-      api.entitlements.getEntitlementsForUser,
-      {},
-      (result: EntitlementState | null) => {
-        currentState = result;
-        for (const cb of listeners) cb(result);
-      },
-      (err: Error) => {
-        console.warn('[entitlements] Subscription query error:', err.message);
-      },
-    );
+		const watch = client.onUpdate(
+			api.entitlements.getEntitlementsForUser,
+			{},
+			(result: EntitlementState | null) => {
+				currentState = result;
+				for (const cb of listeners) cb(result);
+			},
+			(err: Error) => {
+				console.warn("[entitlements] Subscription query error:", err.message);
+			},
+		);
 
-    unsubscribeFn = watch.unsubscribe;
-    initialized = true;
-  } catch (err) {
-    console.error('[entitlements] Failed to initialize Convex subscription:', err);
-    // Do not rethrow — entitlement service failure must not break the dashboard
-  }
+		unsubscribeFn = watch.unsubscribe;
+		initialized = true;
+	} catch (err) {
+		console.error("[entitlements] Failed to initialize Convex subscription:", err);
+		// Do not rethrow — entitlement service failure must not break the dashboard
+	}
 }
 
 /**
@@ -77,13 +77,13 @@ export async function initEntitlementSubscription(_userId?: string): Promise<voi
  * see locked panels during backoff. Call resetEntitlementState() on sign-out.
  */
 export function destroyEntitlementSubscription(): void {
-  if (unsubscribeFn) {
-    unsubscribeFn();
-    unsubscribeFn = null;
-  }
-  // Keep listeners intact — PanelLayout registers them once and expects them
-  // to survive auth transitions. Only the Convex transport is torn down.
-  initialized = false;
+	if (unsubscribeFn) {
+		unsubscribeFn();
+		unsubscribeFn = null;
+	}
+	// Keep listeners intact — PanelLayout registers them once and expects them
+	// to survive auth transitions. Only the Convex transport is torn down.
+	initialized = false;
 }
 
 /**
@@ -92,7 +92,7 @@ export function destroyEntitlementSubscription(): void {
  * Distinct from destroyEntitlementSubscription() which preserves state for reconnects.
  */
 export function resetEntitlementState(): void {
-  currentState = null;
+	currentState = null;
 }
 
 /**
@@ -100,42 +100,40 @@ export function resetEntitlementState(): void {
  * If entitlement state is already available, the callback fires immediately.
  * Returns an unsubscribe function.
  */
-export function onEntitlementChange(
-  cb: (state: EntitlementState | null) => void,
-): () => void {
-  listeners.add(cb);
+export function onEntitlementChange(cb: (state: EntitlementState | null) => void): () => void {
+	listeners.add(cb);
 
-  // Late subscribers get the current value immediately
-  if (currentState !== null) {
-    cb(currentState);
-  }
+	// Late subscribers get the current value immediately
+	if (currentState !== null) {
+		cb(currentState);
+	}
 
-  return () => {
-    listeners.delete(cb);
-  };
+	return () => {
+		listeners.delete(cb);
+	};
 }
 
 /**
  * Returns the current entitlement state, or null if not yet loaded.
  */
 export function getEntitlementState(): EntitlementState | null {
-  return currentState;
+	return currentState;
 }
 
 /**
  * Check whether a specific feature flag is truthy in the current entitlement state.
  */
-export function hasFeature(flag: keyof EntitlementState['features']): boolean {
-  if (currentState === null) return false;
-  return Boolean(currentState.features[flag]);
+export function hasFeature(flag: keyof EntitlementState["features"]): boolean {
+	if (currentState === null) return false;
+	return Boolean(currentState.features[flag]);
 }
 
 /**
  * Check whether the user's tier meets or exceeds the given minimum.
  */
 export function hasTier(minTier: number): boolean {
-  if (currentState === null) return false;
-  return currentState.features.tier >= minTier;
+	if (currentState === null) return false;
+	return currentState.features.tier >= minTier;
 }
 
 /**
@@ -143,9 +141,9 @@ export function hasTier(minTier: number): boolean {
  * Returns true if entitlement data exists, plan is not free, and hasn't expired.
  */
 export function isEntitled(): boolean {
-  return (
-    currentState !== null &&
-    currentState.planKey !== 'free' &&
-    currentState.validUntil >= Date.now()
-  );
+	return (
+		currentState !== null &&
+		currentState.planKey !== "free" &&
+		currentState.validUntil >= Date.now()
+	);
 }

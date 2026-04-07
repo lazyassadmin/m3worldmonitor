@@ -1,9 +1,7 @@
-export const config = { runtime: 'edge' };
+export const config = { runtime: "edge" };
 
-import { createDomainGateway, serverOptions } from '../../../server/gateway';
-import { createRadiationServiceRoutes } from '../../../src/generated/server/worldmonitor/radiation/v1/service_server';
-import { radiationHandler } from '../../../server/worldmonitor/radiation/v1/handler';
+import { createDomainGateway, serverOptions } from "../../../server/gateway";
+import { createRadiationServiceRoutes } from "../../../src/generated/server/worldmonitor/radiation/v1/service_server";
+import { radiationHandler } from "../../../server/worldmonitor/radiation/v1/handler";
 
-export default createDomainGateway(
-  createRadiationServiceRoutes(radiationHandler, serverOptions),
-);
+export default createDomainGateway(createRadiationServiceRoutes(radiationHandler, serverOptions));

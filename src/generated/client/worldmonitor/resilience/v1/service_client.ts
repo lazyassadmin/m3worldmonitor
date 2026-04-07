@@ -3,158 +3,163 @@
 // source: worldmonitor/resilience/v1/service.proto
 
 export interface GetResilienceScoreRequest {
-  countryCode: string;
+	countryCode: string;
 }
 
 export interface GetResilienceScoreResponse {
-  countryCode: string;
-  overallScore: number;
-  level: string;
-  domains: ResilienceDomain[];
-  cronbachAlpha: number;
-  trend: string;
-  change30d: number;
-  lowConfidence: boolean;
+	countryCode: string;
+	overallScore: number;
+	level: string;
+	domains: ResilienceDomain[];
+	cronbachAlpha: number;
+	trend: string;
+	change30d: number;
+	lowConfidence: boolean;
 }
 
 export interface ResilienceDomain {
-  id: string;
-  score: number;
-  weight: number;
-  dimensions: ResilienceDimension[];
+	id: string;
+	score: number;
+	weight: number;
+	dimensions: ResilienceDimension[];
 }
 
 export interface ResilienceDimension {
-  id: string;
-  score: number;
-  coverage: number;
+	id: string;
+	score: number;
+	coverage: number;
 }
 
-export interface GetResilienceRankingRequest {
-}
+export interface GetResilienceRankingRequest {}
 
 export interface GetResilienceRankingResponse {
-  items: ResilienceRankingItem[];
-  greyedOut: ResilienceRankingItem[];
+	items: ResilienceRankingItem[];
+	greyedOut: ResilienceRankingItem[];
 }
 
 export interface ResilienceRankingItem {
-  countryCode: string;
-  overallScore: number;
-  level: string;
-  lowConfidence: boolean;
-  overallCoverage: number;
+	countryCode: string;
+	overallScore: number;
+	level: string;
+	lowConfidence: boolean;
+	overallCoverage: number;
 }
 
 export interface FieldViolation {
-  field: string;
-  description: string;
+	field: string;
+	description: string;
 }
 
 export class ValidationError extends Error {
-  violations: FieldViolation[];
+	violations: FieldViolation[];
 
-  constructor(violations: FieldViolation[]) {
-    super("Validation failed");
-    this.name = "ValidationError";
-    this.violations = violations;
-  }
+	constructor(violations: FieldViolation[]) {
+		super("Validation failed");
+		this.name = "ValidationError";
+		this.violations = violations;
+	}
 }
 
 export class ApiError extends Error {
-  statusCode: number;
-  body: string;
+	statusCode: number;
+	body: string;
 
-  constructor(statusCode: number, message: string, body: string) {
-    super(message);
-    this.name = "ApiError";
-    this.statusCode = statusCode;
-    this.body = body;
-  }
+	constructor(statusCode: number, message: string, body: string) {
+		super(message);
+		this.name = "ApiError";
+		this.statusCode = statusCode;
+		this.body = body;
+	}
 }
 
 export interface ResilienceServiceClientOptions {
-  fetch?: typeof fetch;
-  defaultHeaders?: Record<string, string>;
+	fetch?: typeof fetch;
+	defaultHeaders?: Record<string, string>;
 }
 
 export interface ResilienceServiceCallOptions {
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
+	headers?: Record<string, string>;
+	signal?: AbortSignal;
 }
 
 export class ResilienceServiceClient {
-  private baseURL: string;
-  private fetchFn: typeof fetch;
-  private defaultHeaders: Record<string, string>;
+	private baseURL: string;
+	private fetchFn: typeof fetch;
+	private defaultHeaders: Record<string, string>;
 
-  constructor(baseURL: string, options?: ResilienceServiceClientOptions) {
-    this.baseURL = baseURL.replace(/\/+$/, "");
-    this.fetchFn = options?.fetch ?? globalThis.fetch;
-    this.defaultHeaders = { ...options?.defaultHeaders };
-  }
+	constructor(baseURL: string, options?: ResilienceServiceClientOptions) {
+		this.baseURL = baseURL.replace(/\/+$/, "");
+		this.fetchFn = options?.fetch ?? globalThis.fetch;
+		this.defaultHeaders = { ...options?.defaultHeaders };
+	}
 
-  async getResilienceScore(req: GetResilienceScoreRequest, options?: ResilienceServiceCallOptions): Promise<GetResilienceScoreResponse> {
-    let path = "/api/resilience/v1/get-resilience-score";
-    const params = new URLSearchParams();
-    if (req.countryCode != null && req.countryCode !== "") params.set("countryCode", String(req.countryCode));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+	async getResilienceScore(
+		req: GetResilienceScoreRequest,
+		options?: ResilienceServiceCallOptions,
+	): Promise<GetResilienceScoreResponse> {
+		let path = "/api/resilience/v1/get-resilience-score";
+		const params = new URLSearchParams();
+		if (req.countryCode != null && req.countryCode !== "")
+			params.set("countryCode", String(req.countryCode));
+		const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+			...this.defaultHeaders,
+			...options?.headers,
+		};
 
-    const resp = await this.fetchFn(url, {
-      method: "GET",
-      headers,
-      signal: options?.signal,
-    });
+		const resp = await this.fetchFn(url, {
+			method: "GET",
+			headers,
+			signal: options?.signal,
+		});
 
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
+		if (!resp.ok) {
+			return this.handleError(resp);
+		}
 
-    return await resp.json() as GetResilienceScoreResponse;
-  }
+		return (await resp.json()) as GetResilienceScoreResponse;
+	}
 
-  async getResilienceRanking(req: GetResilienceRankingRequest, options?: ResilienceServiceCallOptions): Promise<GetResilienceRankingResponse> {
-    let path = "/api/resilience/v1/get-resilience-ranking";
-    const url = this.baseURL + path;
+	async getResilienceRanking(
+		req: GetResilienceRankingRequest,
+		options?: ResilienceServiceCallOptions,
+	): Promise<GetResilienceRankingResponse> {
+		let path = "/api/resilience/v1/get-resilience-ranking";
+		const url = this.baseURL + path;
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+			...this.defaultHeaders,
+			...options?.headers,
+		};
 
-    const resp = await this.fetchFn(url, {
-      method: "GET",
-      headers,
-      signal: options?.signal,
-    });
+		const resp = await this.fetchFn(url, {
+			method: "GET",
+			headers,
+			signal: options?.signal,
+		});
 
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
+		if (!resp.ok) {
+			return this.handleError(resp);
+		}
 
-    return await resp.json() as GetResilienceRankingResponse;
-  }
+		return (await resp.json()) as GetResilienceRankingResponse;
+	}
 
-  private async handleError(resp: Response): Promise<never> {
-    const body = await resp.text();
-    if (resp.status === 400) {
-      try {
-        const parsed = JSON.parse(body);
-        if (parsed.violations) {
-          throw new ValidationError(parsed.violations);
-        }
-      } catch (e) {
-        if (e instanceof ValidationError) throw e;
-      }
-    }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
-  }
+	private async handleError(resp: Response): Promise<never> {
+		const body = await resp.text();
+		if (resp.status === 400) {
+			try {
+				const parsed = JSON.parse(body);
+				if (parsed.violations) {
+					throw new ValidationError(parsed.violations);
+				}
+			} catch (e) {
+				if (e instanceof ValidationError) throw e;
+			}
+		}
+		throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+	}
 }
-

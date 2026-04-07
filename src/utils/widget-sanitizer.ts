@@ -1,45 +1,99 @@
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 const PURIFY_CONFIG = {
-  ALLOWED_TAGS: [
-    'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
-    'strong', 'em', 'b', 'i', 'br', 'hr', 'small',
-    'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'tspan',
-  ],
-  ALLOWED_ATTR: [
-    'class', 'style', 'title', 'aria-label',
-    'viewBox', 'fill', 'stroke', 'stroke-width',
-    'd', 'cx', 'cy', 'r', 'x', 'y', 'width', 'height', 'points',
-    'xmlns',
-  ],
-  FORBID_TAGS: ['button', 'input', 'form', 'select', 'textarea', 'script', 'iframe', 'object', 'embed'],
-  ALLOW_DATA_ATTR: false,
-  FORCE_BODY: true,
+	ALLOWED_TAGS: [
+		"div",
+		"span",
+		"p",
+		"h1",
+		"h2",
+		"h3",
+		"h4",
+		"h5",
+		"h6",
+		"ul",
+		"ol",
+		"li",
+		"table",
+		"thead",
+		"tbody",
+		"tr",
+		"th",
+		"td",
+		"strong",
+		"em",
+		"b",
+		"i",
+		"br",
+		"hr",
+		"small",
+		"svg",
+		"path",
+		"circle",
+		"rect",
+		"line",
+		"polyline",
+		"polygon",
+		"text",
+		"tspan",
+	],
+	ALLOWED_ATTR: [
+		"class",
+		"style",
+		"title",
+		"aria-label",
+		"viewBox",
+		"fill",
+		"stroke",
+		"stroke-width",
+		"d",
+		"cx",
+		"cy",
+		"r",
+		"x",
+		"y",
+		"width",
+		"height",
+		"points",
+		"xmlns",
+	],
+	FORBID_TAGS: [
+		"button",
+		"input",
+		"form",
+		"select",
+		"textarea",
+		"script",
+		"iframe",
+		"object",
+		"embed",
+	],
+	ALLOW_DATA_ATTR: false,
+	FORCE_BODY: true,
 };
 
 const UNSAFE_STYLE_PATTERN = /url\s*\(|expression\s*\(|javascript\s*:|@import|behavior\s*:/i;
 
-DOMPurify.addHook('uponSanitizeAttribute', (_node, data) => {
-  if (data.attrName === 'style' && UNSAFE_STYLE_PATTERN.test(data.attrValue)) {
-    data.keepAttr = false;
-  }
+DOMPurify.addHook("uponSanitizeAttribute", (_node, data) => {
+	if (data.attrName === "style" && UNSAFE_STYLE_PATTERN.test(data.attrValue)) {
+		data.keepAttr = false;
+	}
 });
 
 export function sanitizeWidgetHtml(html: string): string {
-  return DOMPurify.sanitize(html, PURIFY_CONFIG) as unknown as string;
+	return DOMPurify.sanitize(html, PURIFY_CONFIG) as unknown as string;
 }
 
 // Strip a leading .panel-header that the agent may generate — the outer
 // CustomWidgetPanel frame already displays the title, so a second one is
 // always a duplicate. Only the very first element is removed.
 function stripLeadingPanelHeader(html: string): string {
-  return html.replace(/^\s*<div[^>]*\bclass="panel-header"[^>]*>[\s\S]*?<\/div>\s*/i, '');
+	return html.replace(/^\s*<div[^>]*\bclass="panel-header"[^>]*>[\s\S]*?<\/div>\s*/i, "");
 }
 
-export function wrapWidgetHtml(html: string, extraClass = ''): string {
-  const shellClass = ['wm-widget-shell', extraClass].filter(Boolean).join(' ');
-  return `
+export function wrapWidgetHtml(html: string, extraClass = ""): string {
+	const shellClass = ["wm-widget-shell", extraClass].filter(Boolean).join(" ");
+	return `
     <div class="${shellClass}">
       <div class="wm-widget-body">
         <div class="wm-widget-generated">${sanitizeWidgetHtml(stripLeadingPanelHeader(html))}</div>
@@ -55,7 +109,7 @@ const widgetBodyStore = new Map<string, string>();
 const iframeHtmlStore = new WeakMap<HTMLIFrameElement, string>();
 
 function buildWidgetDoc(bodyContent: string): string {
-  return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -88,52 +142,52 @@ td{padding:5px 8px;border-bottom:1px solid var(--border-subtle);color:var(--text
 }
 
 function mountProWidget(iframe: HTMLIFrameElement): void {
-  const id = iframe.dataset.wmId;
-  if (!id) return;
+	const id = iframe.dataset.wmId;
+	if (!id) return;
 
-  // Already wired up — the persistent load listener will re-post on every
-  // navigation (including after the panel is dragged to a new position).
-  if (iframeHtmlStore.has(iframe)) return;
+	// Already wired up — the persistent load listener will re-post on every
+	// navigation (including after the panel is dragged to a new position).
+	if (iframeHtmlStore.has(iframe)) return;
 
-  const body = widgetBodyStore.get(id);
-  if (!body) return;
-  widgetBodyStore.delete(id);
-  const html = buildWidgetDoc(body);
-  iframeHtmlStore.set(iframe, html);
+	const body = widgetBodyStore.get(id);
+	if (!body) return;
+	widgetBodyStore.delete(id);
+	const html = buildWidgetDoc(body);
+	iframeHtmlStore.set(iframe, html);
 
-  // Persistent (no { once }) — fires on initial load AND whenever the browser
-  // re-navigates the iframe after its DOM position changes (drag/drop).
-  iframe.addEventListener('load', () => {
-    const storedHtml = iframeHtmlStore.get(iframe);
-    if (storedHtml) iframe.contentWindow?.postMessage({ type: 'wm-html', html: storedHtml }, '*');
-  });
+	// Persistent (no { once }) — fires on initial load AND whenever the browser
+	// re-navigates the iframe after its DOM position changes (drag/drop).
+	iframe.addEventListener("load", () => {
+		const storedHtml = iframeHtmlStore.get(iframe);
+		if (storedHtml) iframe.contentWindow?.postMessage({ type: "wm-html", html: storedHtml }, "*");
+	});
 }
 
-if (typeof document !== 'undefined') {
-  const observer = new MutationObserver((mutations) => {
-    for (const mut of mutations) {
-      for (const node of mut.addedNodes) {
-        if (!(node instanceof Element)) continue;
-        if (node instanceof HTMLIFrameElement && node.dataset.wmId) {
-          mountProWidget(node);
-        } else {
-          node.querySelectorAll<HTMLIFrameElement>('iframe[data-wm-id]').forEach(mountProWidget);
-        }
-      }
-    }
-  });
-  const startObserving = (): void => {
-    if (document.body) observer.observe(document.body, { childList: true, subtree: true });
-  };
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startObserving);
-  } else {
-    startObserving();
-  }
+if (typeof document !== "undefined") {
+	const observer = new MutationObserver((mutations) => {
+		for (const mut of mutations) {
+			for (const node of mut.addedNodes) {
+				if (!(node instanceof Element)) continue;
+				if (node instanceof HTMLIFrameElement && node.dataset.wmId) {
+					mountProWidget(node);
+				} else {
+					node.querySelectorAll<HTMLIFrameElement>("iframe[data-wm-id]").forEach(mountProWidget);
+				}
+			}
+		}
+	});
+	const startObserving = (): void => {
+		if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+	};
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", startObserving);
+	} else {
+		startObserving();
+	}
 }
 
 export function wrapProWidgetHtml(bodyContent: string): string {
-  const id = `wm-${Math.random().toString(36).slice(2)}`;
-  widgetBodyStore.set(id, stripLeadingPanelHeader(bodyContent));
-  return `<div class="wm-widget-shell wm-widget-pro"><iframe src="/wm-widget-sandbox.html" data-wm-id="${id}" sandbox="allow-scripts" style="width:100%;height:400px;border:none;display:block;" title="Interactive widget"></iframe></div>`;
+	const id = `wm-${Math.random().toString(36).slice(2)}`;
+	widgetBodyStore.set(id, stripLeadingPanelHeader(bodyContent));
+	return `<div class="wm-widget-shell wm-widget-pro"><iframe src="/wm-widget-sandbox.html" data-wm-id="${id}" sandbox="allow-scripts" style="width:100%;height:400px;border:none;display:block;" title="Interactive widget"></iframe></div>`;
 }

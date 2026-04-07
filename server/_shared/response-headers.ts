@@ -9,20 +9,20 @@
 const channel = new WeakMap<Request, Record<string, string>>();
 
 export function setResponseHeader(req: Request, key: string, value: string): void {
-  let headers = channel.get(req);
-  if (!headers) {
-    headers = {};
-    channel.set(req, headers);
-  }
-  headers[key] = value;
+	let headers = channel.get(req);
+	if (!headers) {
+		headers = {};
+		channel.set(req, headers);
+	}
+	headers[key] = value;
 }
 
 export function markNoCacheResponse(req: Request): void {
-  setResponseHeader(req, 'X-No-Cache', '1');
+	setResponseHeader(req, "X-No-Cache", "1");
 }
 
 export function drainResponseHeaders(req: Request): Record<string, string> | undefined {
-  const headers = channel.get(req);
-  if (headers) channel.delete(req);
-  return headers;
+	const headers = channel.get(req);
+	if (headers) channel.delete(req);
+	return headers;
 }

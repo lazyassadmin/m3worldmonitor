@@ -4,23 +4,26 @@
  */
 
 import type {
-  ServerContext,
-  GetBisExchangeRatesRequest,
-  GetBisExchangeRatesResponse,
-} from '../../../../src/generated/server/worldmonitor/economic/v1/service_server';
+	ServerContext,
+	GetBisExchangeRatesRequest,
+	GetBisExchangeRatesResponse,
+} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
+import { getCachedJson } from "../../../_shared/redis";
 
-const SEED_CACHE_KEY = 'economic:bis:eer:v1';
+const SEED_CACHE_KEY = "economic:bis:eer:v1";
 
 export async function getBisExchangeRates(
-  _ctx: ServerContext,
-  _req: GetBisExchangeRatesRequest,
+	_ctx: ServerContext,
+	_req: GetBisExchangeRatesRequest,
 ): Promise<GetBisExchangeRatesResponse> {
-  try {
-    const result = await getCachedJson(SEED_CACHE_KEY, true) as GetBisExchangeRatesResponse | null;
-    return result || { rates: [] };
-  } catch {
-    return { rates: [] };
-  }
+	try {
+		const result = (await getCachedJson(
+			SEED_CACHE_KEY,
+			true,
+		)) as GetBisExchangeRatesResponse | null;
+		return result || { rates: [] };
+	} catch {
+		return { rates: [] };
+	}
 }

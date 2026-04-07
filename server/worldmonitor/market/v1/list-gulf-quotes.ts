@@ -4,22 +4,22 @@
  */
 
 import type {
-  ServerContext,
-  ListGulfQuotesRequest,
-  ListGulfQuotesResponse,
-} from '../../../../src/generated/server/worldmonitor/market/v1/service_server';
-import { getCachedJson } from '../../../_shared/redis';
+	ServerContext,
+	ListGulfQuotesRequest,
+	ListGulfQuotesResponse,
+} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+import { getCachedJson } from "../../../_shared/redis";
 
-const SEED_CACHE_KEY = 'market:gulf-quotes:v1';
+const SEED_CACHE_KEY = "market:gulf-quotes:v1";
 
 export async function listGulfQuotes(
-  _ctx: ServerContext,
-  _req: ListGulfQuotesRequest,
+	_ctx: ServerContext,
+	_req: ListGulfQuotesRequest,
 ): Promise<ListGulfQuotesResponse> {
-  try {
-    const seedData = await getCachedJson(SEED_CACHE_KEY, true) as ListGulfQuotesResponse | null;
-    return seedData || { quotes: [], rateLimited: false };
-  } catch {
-    return { quotes: [], rateLimited: false };
-  }
+	try {
+		const seedData = (await getCachedJson(SEED_CACHE_KEY, true)) as ListGulfQuotesResponse | null;
+		return seedData || { quotes: [], rateLimited: false };
+	} catch {
+		return { quotes: [], rateLimited: false };
+	}
 }

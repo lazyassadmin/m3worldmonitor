@@ -4,23 +4,23 @@
  */
 
 import type {
-  ServerContext,
-  GetBisCreditRequest,
-  GetBisCreditResponse,
-} from '../../../../src/generated/server/worldmonitor/economic/v1/service_server';
+	ServerContext,
+	GetBisCreditRequest,
+	GetBisCreditResponse,
+} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
+import { getCachedJson } from "../../../_shared/redis";
 
-const SEED_CACHE_KEY = 'economic:bis:credit:v1';
+const SEED_CACHE_KEY = "economic:bis:credit:v1";
 
 export async function getBisCredit(
-  _ctx: ServerContext,
-  _req: GetBisCreditRequest,
+	_ctx: ServerContext,
+	_req: GetBisCreditRequest,
 ): Promise<GetBisCreditResponse> {
-  try {
-    const result = await getCachedJson(SEED_CACHE_KEY, true) as GetBisCreditResponse | null;
-    return result || { entries: [] };
-  } catch {
-    return { entries: [] };
-  }
+	try {
+		const result = (await getCachedJson(SEED_CACHE_KEY, true)) as GetBisCreditResponse | null;
+		return result || { entries: [] };
+	} catch {
+		return { entries: [] };
+	}
 }

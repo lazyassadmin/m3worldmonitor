@@ -1,16 +1,16 @@
 // Kindness data pipeline: real kindness events from curated news
 // Green labeled dots on the happy map from actual humanity-kindness articles
 
-import { inferGeoHubsFromTitle } from './geo-hub-index';
+import { inferGeoHubsFromTitle } from "./geo-hub-index";
 
 export interface KindnessPoint {
-  lat: number;
-  lon: number;
-  name: string;
-  description: string;
-  intensity: number;      // 0-1, higher = more prominent on map
-  type: 'baseline' | 'real';
-  timestamp: number;
+	lat: number;
+	lon: number;
+	name: string;
+	description: string;
+	intensity: number; // 0-1, higher = more prominent on map
+	type: "baseline" | "real";
+	timestamp: number;
 }
 
 /**
@@ -18,30 +18,28 @@ export interface KindnessPoint {
  * Filters for humanity-kindness category and geocodes via title.
  */
 function extractKindnessEvents(
-  newsItems: Array<{ title: string; happyCategory?: string }>,
+	newsItems: Array<{ title: string; happyCategory?: string }>,
 ): KindnessPoint[] {
-  const kindnessItems = newsItems.filter(
-    item => item.happyCategory === 'humanity-kindness',
-  );
+	const kindnessItems = newsItems.filter((item) => item.happyCategory === "humanity-kindness");
 
-  const events: KindnessPoint[] = [];
-  for (const item of kindnessItems) {
-    const matches = inferGeoHubsFromTitle(item.title);
-    const firstMatch = matches[0];
-    if (firstMatch) {
-      events.push({
-        lat: firstMatch.hub.lat,
-        lon: firstMatch.hub.lon,
-        name: item.title,
-        description: item.title,
-        intensity: 0.8,
-        type: 'real',
-        timestamp: Date.now(),
-      });
-    }
-  }
+	const events: KindnessPoint[] = [];
+	for (const item of kindnessItems) {
+		const matches = inferGeoHubsFromTitle(item.title);
+		const firstMatch = matches[0];
+		if (firstMatch) {
+			events.push({
+				lat: firstMatch.hub.lat,
+				lon: firstMatch.hub.lon,
+				name: item.title,
+				description: item.title,
+				intensity: 0.8,
+				type: "real",
+				timestamp: Date.now(),
+			});
+		}
+	}
 
-  return events;
+	return events;
 }
 
 /**
@@ -49,7 +47,7 @@ function extractKindnessEvents(
  * Only returns events that can be geocoded from article titles.
  */
 export function fetchKindnessData(
-  newsItems?: Array<{ title: string; happyCategory?: string }>,
+	newsItems?: Array<{ title: string; happyCategory?: string }>,
 ): KindnessPoint[] {
-  return newsItems ? extractKindnessEvents(newsItems) : [];
+	return newsItems ? extractKindnessEvents(newsItems) : [];
 }

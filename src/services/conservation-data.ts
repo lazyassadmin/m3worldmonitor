@@ -12,23 +12,23 @@
  */
 
 export interface SpeciesRecovery {
-  id: string;
-  commonName: string;
-  scientificName: string;
-  photoUrl: string;
-  iucnCategory: string;
-  populationTrend: 'increasing' | 'stable';
-  recoveryStatus: 'recovered' | 'recovering' | 'stabilized';
-  populationData: Array<{ year: number; value: number }>;
-  summaryText: string;
-  source: string;
-  region: string;
-  lastUpdated: string;
-  recoveryZone?: {
-    name: string;
-    lat: number;
-    lon: number;
-  };
+	id: string;
+	commonName: string;
+	scientificName: string;
+	photoUrl: string;
+	iucnCategory: string;
+	populationTrend: "increasing" | "stable";
+	recoveryStatus: "recovered" | "recovering" | "stabilized";
+	populationData: Array<{ year: number; value: number }>;
+	summaryText: string;
+	source: string;
+	region: string;
+	lastUpdated: string;
+	recoveryZone?: {
+		name: string;
+		lat: number;
+		lon: number;
+	};
 }
 
 /**
@@ -36,6 +36,6 @@ export interface SpeciesRecovery {
  * Uses dynamic import for code-splitting (JSON only loaded for happy variant).
  */
 export async function fetchConservationWins(): Promise<SpeciesRecovery[]> {
-  const { default: data } = await import('@/data/conservation-wins.json');
-  return data as SpeciesRecovery[];
+	const { default: data } = await import("@/data/conservation-wins.json");
+	return data as SpeciesRecovery[];
 }

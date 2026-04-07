@@ -1,30 +1,30 @@
 export async function readJsonFromUpstash(key, timeoutMs = 3_000) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
+	const url = process.env.UPSTASH_REDIS_REST_URL;
+	const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+	if (!url || !token) return null;
 
-  const resp = await fetch(`${url}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    signal: AbortSignal.timeout(timeoutMs),
-  });
-  if (!resp.ok) return null;
+	const resp = await fetch(`${url}/get/${encodeURIComponent(key)}`, {
+		headers: { Authorization: `Bearer ${token}` },
+		signal: AbortSignal.timeout(timeoutMs),
+	});
+	if (!resp.ok) return null;
 
-  const data = await resp.json();
-  if (!data.result) return null;
+	const data = await resp.json();
+	if (!data.result) return null;
 
-  try {
-    return JSON.parse(data.result);
-  } catch {
-    return null;
-  }
+	try {
+		return JSON.parse(data.result);
+	} catch {
+		return null;
+	}
 }
 
 /** Returns Redis credentials or null if not configured. */
 export function getRedisCredentials() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-  return { url, token };
+	const url = process.env.UPSTASH_REDIS_REST_URL;
+	const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+	if (!url || !token) return null;
+	return { url, token };
 }
 
 /**
@@ -35,20 +35,20 @@ export function getRedisCredentials() {
  * @returns {Promise<Array<{ result: unknown }> | null>}
  */
 export async function redisPipeline(commands, timeoutMs = 5_000) {
-  const creds = getRedisCredentials();
-  if (!creds) return null;
-  try {
-    const resp = await fetch(`${creds.url}/pipeline`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${creds.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(commands),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    if (!resp.ok) return null;
-    return await resp.json();
-  } catch {
-    return null;
-  }
+	const creds = getRedisCredentials();
+	if (!creds) return null;
+	try {
+		const resp = await fetch(`${creds.url}/pipeline`, {
+			method: "POST",
+			headers: { Authorization: `Bearer ${creds.token}`, "Content-Type": "application/json" },
+			body: JSON.stringify(commands),
+			signal: AbortSignal.timeout(timeoutMs),
+		});
+		if (!resp.ok) return null;
+		return await resp.json();
+	} catch {
+		return null;
+	}
 }
 
 /**
@@ -59,8 +59,8 @@ export async function redisPipeline(commands, timeoutMs = 5_000) {
  * @returns {Promise<boolean>} true on success
  */
 export async function setCachedData(key, value, ttlSeconds) {
-  const results = await redisPipeline([
-    ['SET', key, JSON.stringify(value), 'EX', String(ttlSeconds)],
-  ]);
-  return results !== null;
+	const results = await redisPipeline([
+		["SET", key, JSON.stringify(value), "EX", String(ttlSeconds)],
+	]);
+	return results !== null;
 }

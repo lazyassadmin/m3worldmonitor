@@ -5,57 +5,73 @@
  */
 
 const COUNTRY_NAMES = {
-  UA: 'Ukraine', RU: 'Russia', CN: 'China', US: 'United States',
-  IR: 'Iran', IL: 'Israel', TW: 'Taiwan', KP: 'North Korea',
-  SA: 'Saudi Arabia', TR: 'Turkey', PL: 'Poland', DE: 'Germany',
-  FR: 'France', GB: 'United Kingdom', IN: 'India', PK: 'Pakistan',
-  SY: 'Syria', YE: 'Yemen', MM: 'Myanmar', VE: 'Venezuela',
+	UA: "Ukraine",
+	RU: "Russia",
+	CN: "China",
+	US: "United States",
+	IR: "Iran",
+	IL: "Israel",
+	TW: "Taiwan",
+	KP: "North Korea",
+	SA: "Saudi Arabia",
+	TR: "Turkey",
+	PL: "Poland",
+	DE: "Germany",
+	FR: "France",
+	GB: "United Kingdom",
+	IN: "India",
+	PK: "Pakistan",
+	SY: "Syria",
+	YE: "Yemen",
+	MM: "Myanmar",
+	VE: "Venezuela",
 };
 
 const LEVEL_COLORS = {
-  critical: '#ef4444', high: '#f97316', elevated: '#eab308',
-  normal: '#22c55e', low: '#3b82f6',
+	critical: "#ef4444",
+	high: "#f97316",
+	elevated: "#eab308",
+	normal: "#22c55e",
+	low: "#3b82f6",
 };
 
 const LEVEL_LABELS = {
-  critical: 'CRITICAL INSTABILITY',
-  high: 'HIGH INSTABILITY',
-  elevated: 'ELEVATED INSTABILITY',
-  normal: 'STABLE',
-  low: 'LOW RISK',
+	critical: "CRITICAL INSTABILITY",
+	high: "HIGH INSTABILITY",
+	elevated: "ELEVATED INSTABILITY",
+	normal: "STABLE",
+	low: "LOW RISK",
 };
 
 function normalizeLevel(rawLevel) {
-  const level = String(rawLevel || '').toLowerCase();
-  return Object.hasOwn(LEVEL_COLORS, level) ? level : 'normal';
+	const level = String(rawLevel || "").toLowerCase();
+	return Object.hasOwn(LEVEL_COLORS, level) ? level : "normal";
 }
 
 export default function handler(req, res) {
-  const url = new URL(req.url, 'https://worldmonitor.app');
-  const countryCode = (url.searchParams.get('c') || '').toUpperCase();
-  const type = url.searchParams.get('t') || 'ciianalysis';
-  const score = url.searchParams.get('s');
-  const level = normalizeLevel(url.searchParams.get('l'));
+	const url = new URL(req.url, "https://worldmonitor.app");
+	const countryCode = (url.searchParams.get("c") || "").toUpperCase();
+	const type = url.searchParams.get("t") || "ciianalysis";
+	const score = url.searchParams.get("s");
+	const level = normalizeLevel(url.searchParams.get("l"));
 
-  const countryName = COUNTRY_NAMES[countryCode] || countryCode || 'Global';
-  const levelColor = LEVEL_COLORS[level] || '#eab308';
-  const levelLabel = LEVEL_LABELS[level] || 'MONITORING';
-  const parsedScore = score ? Number.parseInt(score, 10) : Number.NaN;
-  const scoreNum = Number.isFinite(parsedScore)
-    ? Math.max(0, Math.min(100, parsedScore))
-    : null;
-  const dateStr = new Date().toISOString().slice(0, 10);
+	const countryName = COUNTRY_NAMES[countryCode] || countryCode || "Global";
+	const levelColor = LEVEL_COLORS[level] || "#eab308";
+	const levelLabel = LEVEL_LABELS[level] || "MONITORING";
+	const parsedScore = score ? Number.parseInt(score, 10) : Number.NaN;
+	const scoreNum = Number.isFinite(parsedScore) ? Math.max(0, Math.min(100, parsedScore)) : null;
+	const dateStr = new Date().toISOString().slice(0, 10);
 
-  // Score arc (semicircle gauge)
-  const arcRadius = 90;
-  const arcCx = 960;
-  const arcCy = 340;
-  const scoreAngle = scoreNum !== null ? (scoreNum / 100) * Math.PI : 0;
-  const arcEndX = arcCx - arcRadius * Math.cos(scoreAngle);
-  const arcEndY = arcCy - arcRadius * Math.sin(scoreAngle);
-  const largeArc = scoreNum > 50 ? 1 : 0;
+	// Score arc (semicircle gauge)
+	const arcRadius = 90;
+	const arcCx = 960;
+	const arcCy = 340;
+	const scoreAngle = scoreNum !== null ? (scoreNum / 100) * Math.PI : 0;
+	const arcEndX = arcCx - arcRadius * Math.cos(scoreAngle);
+	const arcEndY = arcCy - arcRadius * Math.sin(scoreAngle);
+	const largeArc = scoreNum > 50 ? 1 : 0;
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#0c0c18"/>
@@ -78,8 +94,8 @@ export default function handler(req, res) {
 
   <!-- Subtle grid -->
   <g opacity="0.03">
-    ${Array.from({length: 30}, (_, i) => `<line x1="${i*40}" y1="0" x2="${i*40}" y2="630" stroke="#fff" stroke-width="1"/>`).join('\n    ')}
-    ${Array.from({length: 16}, (_, i) => `<line x1="0" y1="${i*40}" x2="1200" y2="${i*40}" stroke="#fff" stroke-width="1"/>`).join('\n    ')}
+    ${Array.from({ length: 30 }, (_, i) => `<line x1="${i * 40}" y1="0" x2="${i * 40}" y2="630" stroke="#fff" stroke-width="1"/>`).join("\n    ")}
+    ${Array.from({ length: 16 }, (_, i) => `<line x1="0" y1="${i * 40}" x2="1200" y2="${i * 40}" stroke="#fff" stroke-width="1"/>`).join("\n    ")}
   </g>
 
   <!-- WORLDMONITOR brand -->
@@ -111,7 +127,9 @@ export default function handler(req, res) {
   <text x="60" y="200" font-family="system-ui, sans-serif" font-size="22" fill="#666" letter-spacing="3"
     >INTELLIGENCE BRIEF</text>
 
-  ${scoreNum !== null ? `
+  ${
+		scoreNum !== null
+			? `
   <!-- LEFT COLUMN: Data cards -->
   <!-- CII Score large display -->
   <text x="60" y="310" font-family="system-ui, -apple-system, sans-serif" font-size="120" font-weight="800" fill="${levelColor}"
@@ -140,8 +158,12 @@ export default function handler(req, res) {
   <path d="M ${arcCx - arcRadius},${arcCy} A ${arcRadius} ${arcRadius} 0 1 1 ${arcCx + arcRadius},${arcCy}"
     fill="none" stroke="#1a1a2e" stroke-width="16" stroke-linecap="round"/>
   <!-- Arc fill -->
-  ${scoreNum > 0 ? `<path d="M ${arcCx + arcRadius},${arcCy} A ${arcRadius} ${arcRadius} 0 ${largeArc} 0 ${arcEndX.toFixed(1)},${arcEndY.toFixed(1)}"
-    fill="none" stroke="${levelColor}" stroke-width="16" stroke-linecap="round"/>` : ''}
+  ${
+		scoreNum > 0
+			? `<path d="M ${arcCx + arcRadius},${arcCy} A ${arcRadius} ${arcRadius} 0 ${largeArc} 0 ${arcEndX.toFixed(1)},${arcEndY.toFixed(1)}"
+    fill="none" stroke="${levelColor}" stroke-width="16" stroke-linecap="round"/>`
+			: ""
+	}
   <!-- Score in center of arc -->
   <text x="${arcCx}" y="${arcCy - 20}" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="800" fill="${levelColor}" text-anchor="middle"
     >${scoreNum}</text>
@@ -171,7 +193,8 @@ export default function handler(req, res) {
   <rect x="860" y="448" width="10" height="10" rx="2" fill="#3b82f6"/>
   <text x="880" y="458" font-family="system-ui, sans-serif" font-size="15" fill="#aaa">Active Signals</text>
 
-  ` : `
+  `
+			: `
   <!-- No score available — show feature overview -->
   <text x="60" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="40" fill="#ddd" font-weight="600"
     >Real-time intelligence analysis</text>
@@ -194,7 +217,8 @@ export default function handler(req, res) {
   <rect x="870" y="345" width="270" height="80" rx="8" fill="#111" stroke="#222" stroke-width="1"/>
   <text x="890" y="375" font-family="system-ui, sans-serif" font-size="16" fill="#8b5cf6" font-weight="700">Signal Convergence</text>
   <text x="890" y="400" font-family="system-ui, sans-serif" font-size="13" fill="#888">Multi-source correlation</text>
-  `}
+  `
+	}
 
   <!-- Bottom bar -->
   <rect x="0" y="490" width="1200" height="140" fill="#080810"/>
@@ -220,11 +244,15 @@ export default function handler(req, res) {
     >worldmonitor.app · ${dateStr} · Free &amp; open source</text>
 </svg>`;
 
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=600');
-  res.status(200).send(svg);
+	res.setHeader("Content-Type", "image/svg+xml");
+	res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600, stale-while-revalidate=600");
+	res.status(200).send(svg);
 }
 
 function escapeXml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
 }

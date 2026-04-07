@@ -4,23 +4,26 @@
  */
 
 import type {
-  ClimateServiceHandler,
-  ServerContext,
-  ListClimateAnomaliesRequest,
-  ListClimateAnomaliesResponse,
-} from '../../../../src/generated/server/worldmonitor/climate/v1/service_server';
+	ClimateServiceHandler,
+	ServerContext,
+	ListClimateAnomaliesRequest,
+	ListClimateAnomaliesResponse,
+} from "../../../../src/generated/server/worldmonitor/climate/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
-import { CLIMATE_ANOMALIES_KEY } from '../../../_shared/cache-keys';
+import { getCachedJson } from "../../../_shared/redis";
+import { CLIMATE_ANOMALIES_KEY } from "../../../_shared/cache-keys";
 
-export const listClimateAnomalies: ClimateServiceHandler['listClimateAnomalies'] = async (
-  _ctx: ServerContext,
-  _req: ListClimateAnomaliesRequest,
+export const listClimateAnomalies: ClimateServiceHandler["listClimateAnomalies"] = async (
+	_ctx: ServerContext,
+	_req: ListClimateAnomaliesRequest,
 ): Promise<ListClimateAnomaliesResponse> => {
-  try {
-    const result = await getCachedJson(CLIMATE_ANOMALIES_KEY, true) as ListClimateAnomaliesResponse | null;
-    return { anomalies: result?.anomalies || [], pagination: undefined };
-  } catch {
-    return { anomalies: [], pagination: undefined };
-  }
+	try {
+		const result = (await getCachedJson(
+			CLIMATE_ANOMALIES_KEY,
+			true,
+		)) as ListClimateAnomaliesResponse | null;
+		return { anomalies: result?.anomalies || [], pagination: undefined };
+	} catch {
+		return { anomalies: [], pagination: undefined };
+	}
 };

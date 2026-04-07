@@ -15,18 +15,18 @@
  * No error logging on upstream failures (following established 2F-01 pattern).
  */
 
-import type { ConflictServiceHandler } from '../../../../src/generated/server/worldmonitor/conflict/v1/service_server';
+import type { ConflictServiceHandler } from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
 
-import { listAcledEvents } from './list-acled-events';
-import { listUcdpEvents } from './list-ucdp-events';
-import { getHumanitarianSummary } from './get-humanitarian-summary';
-import { getHumanitarianSummaryBatch } from './get-humanitarian-summary-batch';
-import { listIranEvents } from './list-iran-events';
+import { listAcledEvents } from "./list-acled-events";
+import { listUcdpEvents } from "./list-ucdp-events";
+import { getHumanitarianSummary } from "./get-humanitarian-summary";
+import { getHumanitarianSummaryBatch } from "./get-humanitarian-summary-batch";
+import { listIranEvents } from "./list-iran-events";
 
 export const conflictHandler: ConflictServiceHandler = {
-  listAcledEvents,
-  listUcdpEvents,
-  getHumanitarianSummary,
-  getHumanitarianSummaryBatch,
-  listIranEvents,
+	listAcledEvents,
+	listUcdpEvents,
+	getHumanitarianSummary,
+	getHumanitarianSummaryBatch,
+	listIranEvents,
 };

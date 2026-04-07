@@ -1,1 +1,1 @@
-export { getRelayBaseUrl, getRelayHeaders } from '../../../_shared/relay';
+export { getRelayBaseUrl, getRelayHeaders } from "../../../_shared/relay";

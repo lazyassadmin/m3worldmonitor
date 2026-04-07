@@ -11,15 +11,15 @@
  */
 
 export interface RenewableInstallation {
-  id: string;
-  name: string;
-  type: 'solar' | 'wind' | 'hydro' | 'geothermal';
-  capacityMW: number;
-  country: string; // ISO-2
-  lat: number;
-  lon: number;
-  status: 'operational' | 'under_construction';
-  year: number;
+	id: string;
+	name: string;
+	type: "solar" | "wind" | "hydro" | "geothermal";
+	capacityMW: number;
+	country: string; // ISO-2
+	lat: number;
+	lon: number;
+	status: "operational" | "under_construction";
+	year: number;
 }
 
 /**
@@ -27,6 +27,6 @@ export interface RenewableInstallation {
  * Uses dynamic import for code-splitting (JSON only loaded for happy variant).
  */
 export async function fetchRenewableInstallations(): Promise<RenewableInstallation[]> {
-  const { default: data } = await import('@/data/renewable-installations.json');
-  return data as RenewableInstallation[];
+	const { default: data } = await import("@/data/renewable-installations.json");
+	return data as RenewableInstallation[];
 }
