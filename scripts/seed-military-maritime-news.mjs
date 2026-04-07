@@ -20,52 +20,59 @@
  * - summarizeArticle: per-article LLM summarization
  */
 
-import { loadEnvFile, CHROME_UA } from './_seed-utils.mjs';
+import { loadEnvFile, CHROME_UA } from "./_seed-utils.mjs";
 
 loadEnvFile(import.meta.url);
 
-const API_BASE = 'https://api.worldmonitor.app';
+const API_BASE = "https://api.worldmonitor.app";
 const TIMEOUT = 30_000;
 
 async function warmPing(name, path, body = {}) {
-  try {
-    const resp = await fetch(`${API_BASE}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'User-Agent': CHROME_UA, Origin: 'https://worldmonitor.app' },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(TIMEOUT),
-    });
-    if (!resp.ok) {
-      console.warn(`  ${name}: HTTP ${resp.status}`);
-      return false;
-    }
-    const data = await resp.json();
-    const count = data.report?.vessels?.length ?? data.warnings?.length ?? 0;
-    console.log(`  ${name}: OK (${count} items)`);
-    return true;
-  } catch (e) {
-    console.warn(`  ${name}: ${e.message}`);
-    return false;
-  }
+	try {
+		const resp = await fetch(`${API_BASE}${path}`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"User-Agent": CHROME_UA,
+				Origin: "https://worldmonitor.app",
+			},
+			body: JSON.stringify(body),
+			signal: AbortSignal.timeout(TIMEOUT),
+		});
+		if (!resp.ok) {
+			console.warn(`  ${name}: HTTP ${resp.status}`);
+			return false;
+		}
+		const data = await resp.json();
+		const count = data.report?.vessels?.length ?? data.warnings?.length ?? 0;
+		console.log(`  ${name}: OK (${count} items)`);
+		return true;
+	} catch (e) {
+		console.warn(`  ${name}: ${e.message}`);
+		return false;
+	}
 }
 
 async function main() {
-  console.log('=== Military/Maritime Warm-Ping Seed ===');
-  const start = Date.now();
+	console.log("=== Military/Maritime Warm-Ping Seed ===");
+	const start = Date.now();
 
-  const results = await Promise.allSettled([
-    warmPing('USNI Fleet Report', '/api/military/v1/get-usni-fleet-report'),
-    warmPing('Nav Warnings', '/api/maritime/v1/list-navigational-warnings'),
-  ]);
+	const results = await Promise.allSettled([
+		warmPing("USNI Fleet Report", "/api/military/v1/get-usni-fleet-report"),
+		warmPing("Nav Warnings", "/api/maritime/v1/list-navigational-warnings"),
+	]);
 
-  for (const r of results) { if (r.status === 'rejected') console.warn(`  Warm-ping failed: ${r.reason?.message || r.reason}`); }
+	for (const r of results) {
+		if (r.status === "rejected")
+			console.warn(`  Warm-ping failed: ${r.reason?.message || r.reason}`);
+	}
 
-  const ok = results.filter(r => r.status === 'fulfilled' && r.value).length;
-  const total = results.length;
-  const duration = Date.now() - start;
+	const ok = results.filter((r) => r.status === "fulfilled" && r.value).length;
+	const total = results.length;
+	const duration = Date.now() - start;
 
-  console.log(`\n=== Done: ${ok}/${total} warm-pings OK (${duration}ms) ===`);
-  process.exit(ok > 0 ? 0 : 1);
+	console.log(`\n=== Done: ${ok}/${total} warm-pings OK (${duration}ms) ===`);
+	process.exit(ok > 0 ? 0 : 1);
 }
 
 main();

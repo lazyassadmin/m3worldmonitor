@@ -14,14 +14,16 @@
  * for V8, Deno, Bun, and Cloudflare Workers edge runtimes.
  */
 function isNetworkError(error: unknown): boolean {
-  if (!(error instanceof TypeError)) return false;
-  const msg = error.message.toLowerCase();
-  return msg.includes('fetch') ||
-    msg.includes('network') ||
-    msg.includes('connect') ||
-    msg.includes('econnrefused') ||
-    msg.includes('enotfound') ||
-    msg.includes('socket');
+	if (!(error instanceof TypeError)) return false;
+	const msg = error.message.toLowerCase();
+	return (
+		msg.includes("fetch") ||
+		msg.includes("network") ||
+		msg.includes("connect") ||
+		msg.includes("econnrefused") ||
+		msg.includes("enotfound") ||
+		msg.includes("socket")
+	);
 }
 
 /**
@@ -29,50 +31,60 @@ function isNetworkError(error: unknown): boolean {
  * Matches the `ServerOptions.onError` signature:
  *   (error: unknown, req: Request) => Response | Promise<Response>
  */
-function jsonMessageResponse(message: string, status: number, extras?: Record<string, unknown>): Response {
-  return new Response(JSON.stringify({ message, ...(extras ?? {}) }), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
+function jsonMessageResponse(
+	message: string,
+	status: number,
+	extras?: Record<string, unknown>,
+): Response {
+	return new Response(JSON.stringify({ message, ...(extras ?? {}) }), {
+		status,
+		headers: { "Content-Type": "application/json" },
+	});
 }
 
 export function mapErrorToResponse(error: unknown, _req: Request): Response {
-  // ApiError: has statusCode property (e.g., upstream returns 429, 403, etc.)
-  if (error instanceof Error && 'statusCode' in error) {
-    const statusCode = (error as Error & { statusCode: number }).statusCode;
-    // Only expose error.message for 4xx (client errors). Use generic message for 5xx
-    // to avoid leaking internal details like upstream URLs or API key fragments (H-3 fix).
-    const message = statusCode >= 400 && statusCode < 500
-      ? error.message
-      : 'Internal server error';
-    const body: Record<string, unknown> = { message };
+	// ApiError: has statusCode property (e.g., upstream returns 429, 403, etc.)
+	if (error instanceof Error && "statusCode" in error) {
+		const statusCode = (error as Error & { statusCode: number }).statusCode;
+		// Only expose error.message for 4xx (client errors). Use generic message for 5xx
+		// to avoid leaking internal details like upstream URLs or API key fragments (H-3 fix).
+		const message = statusCode >= 400 && statusCode < 500 ? error.message : "Internal server error";
+		const body: Record<string, unknown> = { message };
 
-    // Rate limit: include retryAfter if present
-    if (statusCode === 429 && 'retryAfter' in error) {
-      body.retryAfter = (error as Error & { retryAfter: number }).retryAfter;
-    }
+		// Rate limit: include retryAfter if present
+		if (statusCode === 429 && "retryAfter" in error) {
+			body.retryAfter = (error as Error & { retryAfter: number }).retryAfter;
+		}
 
-    if (statusCode >= 500) {
-      // Log upstream response body (truncated) for debugging (M-4 fix)
-      const apiBody = 'body' in error ? String((error as any).body).slice(0, 500) : '';
-      console.error(`[error-mapper] ${statusCode}:`, error.message, apiBody ? `| body: ${apiBody}` : '');
-    }
+		if (statusCode >= 500) {
+			// Log upstream response body (truncated) for debugging (M-4 fix)
+			const apiBody = "body" in error ? String((error as any).body).slice(0, 500) : "";
+			console.error(
+				`[error-mapper] ${statusCode}:`,
+				error.message,
+				apiBody ? `| body: ${apiBody}` : "",
+			);
+		}
 
-    return jsonMessageResponse(message, statusCode, statusCode === 429 ? { retryAfter: body.retryAfter } : undefined);
-  }
+		return jsonMessageResponse(
+			message,
+			statusCode,
+			statusCode === 429 ? { retryAfter: body.retryAfter } : undefined,
+		);
+	}
 
-  // JSON parse errors from req.json() on malformed/empty POST body → 400 not 500
-  if (error instanceof SyntaxError) {
-    return jsonMessageResponse('Invalid request body', 400);
-  }
+	// JSON parse errors from req.json() on malformed/empty POST body → 400 not 500
+	if (error instanceof SyntaxError) {
+		return jsonMessageResponse("Invalid request body", 400);
+	}
 
-  // Network/fetch errors: upstream is unreachable (M-5 fix: runtime-agnostic detection)
-  if (isNetworkError(error)) {
-    console.error('[error-mapper] Network error (502):', (error as Error).message);
-    return jsonMessageResponse('Upstream unavailable', 502);
-  }
+	// Network/fetch errors: upstream is unreachable (M-5 fix: runtime-agnostic detection)
+	if (isNetworkError(error)) {
+		console.error("[error-mapper] Network error (502):", (error as Error).message);
+		return jsonMessageResponse("Upstream unavailable", 502);
+	}
 
-  // Catch-all: 500 Internal Server Error
-  console.error('[error-mapper] Unhandled error:', error instanceof Error ? error.message : error);
-  return jsonMessageResponse('Internal server error', 500);
+	// Catch-all: 500 Internal Server Error
+	console.error("[error-mapper] Unhandled error:", error instanceof Error ? error.message : error);
+	return jsonMessageResponse("Internal server error", 500);
 }

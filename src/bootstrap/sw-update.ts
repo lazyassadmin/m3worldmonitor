@@ -1,31 +1,31 @@
 interface DocumentLike {
-  readonly visibilityState: string;
-  querySelector: (sel: string) => Element | null;
-  createElement: (tag: string) => HTMLElement;
-  body: { appendChild: (el: Element) => void; contains: (el: Element | null) => boolean };
-  addEventListener: (type: string, cb: () => void) => void;
-  removeEventListener: (type: string, cb: () => void) => void;
+	readonly visibilityState: string;
+	querySelector: (sel: string) => Element | null;
+	createElement: (tag: string) => HTMLElement;
+	body: { appendChild: (el: Element) => void; contains: (el: Element | null) => boolean };
+	addEventListener: (type: string, cb: () => void) => void;
+	removeEventListener: (type: string, cb: () => void) => void;
 }
 
 interface ServiceWorkerContainerLike {
-  readonly controller: object | null;
-  addEventListener: (type: string, cb: () => void) => void;
+	readonly controller: object | null;
+	addEventListener: (type: string, cb: () => void) => void;
 }
 
 export interface SwUpdateHandlerOptions {
-  swContainer?: ServiceWorkerContainerLike;
-  document?: DocumentLike;
-  reload?: () => void;
-  /** Override requestAnimationFrame for testing (defaults to global rAF). */
-  raf?: (cb: () => void) => void;
-  /** Override setTimeout for testing. */
-  setTimer?: (cb: () => void, ms: number) => ReturnType<typeof setTimeout>;
-  /** Override clearTimeout for testing. */
-  clearTimer?: (id: ReturnType<typeof setTimeout> | null) => void;
-  /** Enable debug logging. Defaults to localStorage.getItem('wm-debug-sw') === '1'. */
-  debug?: boolean;
-  /** App version string included in debug log entries. */
-  version?: string;
+	swContainer?: ServiceWorkerContainerLike;
+	document?: DocumentLike;
+	reload?: () => void;
+	/** Override requestAnimationFrame for testing (defaults to global rAF). */
+	raf?: (cb: () => void) => void;
+	/** Override setTimeout for testing. */
+	setTimer?: (cb: () => void, ms: number) => ReturnType<typeof setTimeout>;
+	/** Override clearTimeout for testing. */
+	clearTimer?: (id: ReturnType<typeof setTimeout> | null) => void;
+	/** Enable debug logging. Defaults to localStorage.getItem('wm-debug-sw') === '1'. */
+	debug?: boolean;
+	/** App version string included in debug log entries. */
+	version?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -34,17 +34,17 @@ export interface SwUpdateHandlerOptions {
 // Copy with: JSON.parse(sessionStorage.getItem('wm-sw-debug-log'))
 // ---------------------------------------------------------------------------
 
-export const SW_DEBUG_LOG_KEY = 'wm-sw-debug-log';
+export const SW_DEBUG_LOG_KEY = "wm-sw-debug-log";
 const SW_DEBUG_LOG_MAX = 30;
 
 function appendDebugLog(entry: Record<string, unknown>): void {
-  try {
-    const raw = sessionStorage.getItem(SW_DEBUG_LOG_KEY);
-    const log = (raw ? JSON.parse(raw) : []) as unknown[];
-    log.push(entry);
-    if (log.length > SW_DEBUG_LOG_MAX) log.splice(0, log.length - SW_DEBUG_LOG_MAX);
-    sessionStorage.setItem(SW_DEBUG_LOG_KEY, JSON.stringify(log));
-  } catch {}
+	try {
+		const raw = sessionStorage.getItem(SW_DEBUG_LOG_KEY);
+		const log = (raw ? JSON.parse(raw) : []) as unknown[];
+		log.push(entry);
+		if (log.length > SW_DEBUG_LOG_MAX) log.splice(0, log.length - SW_DEBUG_LOG_MAX);
+		sessionStorage.setItem(SW_DEBUG_LOG_KEY, JSON.stringify(log));
+	} catch {}
 }
 
 /**
@@ -65,55 +65,66 @@ function appendDebugLog(entry: Record<string, unknown>): void {
  * Dismissing one version never suppresses toasts for future deploys.
  */
 export function installSwUpdateHandler(options: SwUpdateHandlerOptions = {}): void {
-  const swContainer = options.swContainer ?? navigator.serviceWorker;
-  const doc = options.document ?? (document as unknown as DocumentLike);
-  const reload = options.reload ?? (() => window.location.reload());
-  const raf = options.raf ?? ((cb: () => void) => requestAnimationFrame(() => requestAnimationFrame(cb)));
-  const setTimer = options.setTimer ?? ((cb: () => void, ms: number) => setTimeout(cb, ms));
-  const clearTimer = options.clearTimer ?? ((id: ReturnType<typeof setTimeout> | null) => { if (id !== null) clearTimeout(id); });
+	const swContainer = options.swContainer ?? navigator.serviceWorker;
+	const doc = options.document ?? (document as unknown as DocumentLike);
+	const reload = options.reload ?? (() => window.location.reload());
+	const raf =
+		options.raf ?? ((cb: () => void) => requestAnimationFrame(() => requestAnimationFrame(cb)));
+	const setTimer = options.setTimer ?? ((cb: () => void, ms: number) => setTimeout(cb, ms));
+	const clearTimer =
+		options.clearTimer ??
+		((id: ReturnType<typeof setTimeout> | null) => {
+			if (id !== null) clearTimeout(id);
+		});
 
-  const debugEnabled = options.debug ?? (() => {
-    try { return localStorage.getItem('wm-debug-sw') === '1'; } catch { return false; }
-  })();
-  const version = options.version;
+	const debugEnabled =
+		options.debug ??
+		(() => {
+			try {
+				return localStorage.getItem("wm-debug-sw") === "1";
+			} catch {
+				return false;
+			}
+		})();
+	const version = options.version;
 
-  function logSw(event: string, extra: Record<string, unknown> = {}): void {
-    if (!debugEnabled) return;
-    const entry: Record<string, unknown> = {
-      event,
-      ts: new Date().toISOString(),
-      visibility: doc.visibilityState,
-      hasController: !!swContainer.controller,
-      ...extra,
-    };
-    if (version !== undefined) entry.version = version;
-    console.log('[SWDEBUG]', entry);
-    appendDebugLog(entry);
-  }
+	function logSw(event: string, extra: Record<string, unknown> = {}): void {
+		if (!debugEnabled) return;
+		const entry: Record<string, unknown> = {
+			event,
+			ts: new Date().toISOString(),
+			visibility: doc.visibilityState,
+			hasController: !!swContainer.controller,
+			...extra,
+		};
+		if (version !== undefined) entry.version = version;
+		console.log("[SWDEBUG]", entry);
+		appendDebugLog(entry);
+	}
 
-  // Minimum time the tab must remain visible after the toast appears before
-  // auto-reload on tab-hide is enabled.
-  const VISIBLE_DWELL_MS = 5_000;
+	// Minimum time the tab must remain visible after the toast appears before
+	// auto-reload on tab-hide is enabled.
+	const VISIBLE_DWELL_MS = 5_000;
 
-  let currentOnHidden: (() => void) | null = null;
-  let currentDwellCancel: (() => void) | null = null;
+	let currentOnHidden: (() => void) | null = null;
+	let currentDwellCancel: (() => void) | null = null;
 
-  const showToast = (): void => {
-    if (currentOnHidden) {
-      doc.removeEventListener('visibilitychange', currentOnHidden);
-      currentOnHidden = null;
-    }
-    // P2: cancel stale dwell timer from the superseded toast so it cannot
-    // fire after the toast is gone (prevents debug log pollution).
-    if (currentDwellCancel) {
-      currentDwellCancel();
-      currentDwellCancel = null;
-    }
-    doc.querySelector('.update-toast')?.remove();
+	const showToast = (): void => {
+		if (currentOnHidden) {
+			doc.removeEventListener("visibilitychange", currentOnHidden);
+			currentOnHidden = null;
+		}
+		// P2: cancel stale dwell timer from the superseded toast so it cannot
+		// fire after the toast is gone (prevents debug log pollution).
+		if (currentDwellCancel) {
+			currentDwellCancel();
+			currentDwellCancel = null;
+		}
+		doc.querySelector(".update-toast")?.remove();
 
-    const toast = doc.createElement('div');
-    toast.className = 'update-toast';
-    toast.innerHTML = `
+		const toast = doc.createElement("div");
+		toast.className = "update-toast";
+		toast.innerHTML = `
       <div class="update-toast-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"/>
@@ -128,82 +139,86 @@ export function installSwUpdateHandler(options: SwUpdateHandlerOptions = {}): vo
       <button class="update-toast-dismiss" data-action="dismiss" aria-label="Dismiss">\u00d7</button>
     `;
 
-    let dismissed = false;
-    let autoReloadAllowed = false;
-    let dwellTimerId: ReturnType<typeof setTimer> | null = null;
+		let dismissed = false;
+		let autoReloadAllowed = false;
+		let dwellTimerId: ReturnType<typeof setTimer> | null = null;
 
-    const startDwellTimer = (): void => {
-      if (dwellTimerId !== null || dismissed || autoReloadAllowed) return;
-      logSw('dwell-timer-started', { delayMs: VISIBLE_DWELL_MS });
-      dwellTimerId = setTimer(() => {
-        dwellTimerId = null;
-        autoReloadAllowed = true;
-        logSw('dwell-timer-expired', { autoReloadAllowed: true });
-      }, VISIBLE_DWELL_MS);
-    };
+		const startDwellTimer = (): void => {
+			if (dwellTimerId !== null || dismissed || autoReloadAllowed) return;
+			logSw("dwell-timer-started", { delayMs: VISIBLE_DWELL_MS });
+			dwellTimerId = setTimer(() => {
+				dwellTimerId = null;
+				autoReloadAllowed = true;
+				logSw("dwell-timer-expired", { autoReloadAllowed: true });
+			}, VISIBLE_DWELL_MS);
+		};
 
-    // If already visible when the toast appears, start the dwell timer immediately.
-    if (doc.visibilityState === 'visible') startDwellTimer();
+		// If already visible when the toast appears, start the dwell timer immediately.
+		if (doc.visibilityState === "visible") startDwellTimer();
 
-    logSw('toast-shown', { wasVisible: doc.visibilityState === 'visible' });
+		logSw("toast-shown", { wasVisible: doc.visibilityState === "visible" });
 
-    const onHidden = (): void => {
-      if (doc.visibilityState === 'visible') {
-        // Tab returned to foreground — start dwell timer if not already running.
-        logSw('visibility-visible');
-        startDwellTimer();
-        return;
-      }
-      // P1: hidden time must not count toward the dwell window — cancel the
-      // in-flight timer so the full VISIBLE_DWELL_MS restarts on next foreground.
-      if (!autoReloadAllowed && dwellTimerId !== null) {
-        clearTimer(dwellTimerId);
-        dwellTimerId = null;
-        logSw('dwell-timer-cancelled-on-hide');
-      }
-      logSw('visibility-hidden', { autoReloadAllowed, dismissed });
-      if (!dismissed && autoReloadAllowed && doc.body.contains(toast)) {
-        logSw('auto-reload-triggered');
-        reload();
-      }
-    };
+		const onHidden = (): void => {
+			if (doc.visibilityState === "visible") {
+				// Tab returned to foreground — start dwell timer if not already running.
+				logSw("visibility-visible");
+				startDwellTimer();
+				return;
+			}
+			// P1: hidden time must not count toward the dwell window — cancel the
+			// in-flight timer so the full VISIBLE_DWELL_MS restarts on next foreground.
+			if (!autoReloadAllowed && dwellTimerId !== null) {
+				clearTimer(dwellTimerId);
+				dwellTimerId = null;
+				logSw("dwell-timer-cancelled-on-hide");
+			}
+			logSw("visibility-hidden", { autoReloadAllowed, dismissed });
+			if (!dismissed && autoReloadAllowed && doc.body.contains(toast)) {
+				logSw("auto-reload-triggered");
+				reload();
+			}
+		};
 
-    toast.addEventListener('click', (e) => {
-      const action = (e.target as HTMLElement).closest<HTMLElement>('[data-action]')?.dataset.action;
-      if (action === 'reload') {
-        clearTimer(dwellTimerId);
-        dwellTimerId = null;
-        currentDwellCancel = null;
-        logSw('reload-clicked');
-        reload();
-      } else if (action === 'dismiss') {
-        clearTimer(dwellTimerId);
-        dwellTimerId = null;
-        currentDwellCancel = null;
-        dismissed = true;
-        logSw('dismiss-clicked');
-        doc.removeEventListener('visibilitychange', onHidden);
-        currentOnHidden = null;
-        toast.classList.remove('visible');
-        setTimeout(() => toast.remove(), 300);
-      }
-    });
+		toast.addEventListener("click", (e) => {
+			const action = (e.target as HTMLElement).closest<HTMLElement>("[data-action]")?.dataset
+				.action;
+			if (action === "reload") {
+				clearTimer(dwellTimerId);
+				dwellTimerId = null;
+				currentDwellCancel = null;
+				logSw("reload-clicked");
+				reload();
+			} else if (action === "dismiss") {
+				clearTimer(dwellTimerId);
+				dwellTimerId = null;
+				currentDwellCancel = null;
+				dismissed = true;
+				logSw("dismiss-clicked");
+				doc.removeEventListener("visibilitychange", onHidden);
+				currentOnHidden = null;
+				toast.classList.remove("visible");
+				setTimeout(() => toast.remove(), 300);
+			}
+		});
 
-    currentOnHidden = onHidden;
-    currentDwellCancel = () => { clearTimer(dwellTimerId); dwellTimerId = null; };
-    doc.addEventListener('visibilitychange', onHidden);
-    doc.body.appendChild(toast);
-    raf(() => toast.classList.add('visible'));
-  };
+		currentOnHidden = onHidden;
+		currentDwellCancel = () => {
+			clearTimer(dwellTimerId);
+			dwellTimerId = null;
+		};
+		doc.addEventListener("visibilitychange", onHidden);
+		doc.body.appendChild(toast);
+		raf(() => toast.classList.add("visible"));
+	};
 
-  let hadController = !!swContainer.controller;
-  logSw('handler-installed', { hadController });
-  swContainer.addEventListener('controllerchange', () => {
-    logSw('controllerchange', { hadController });
-    if (!hadController) {
-      hadController = true;
-      return;
-    }
-    showToast();
-  });
+	let hadController = !!swContainer.controller;
+	logSw("handler-installed", { hadController });
+	swContainer.addEventListener("controllerchange", () => {
+		logSw("controllerchange", { hadController });
+		if (!hadController) {
+			hadController = true;
+			return;
+		}
+		showToast();
+	});
 }

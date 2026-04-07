@@ -4,24 +4,24 @@
  */
 
 import type {
-  WildfireServiceHandler,
-  ServerContext,
-  ListFireDetectionsRequest,
-  ListFireDetectionsResponse,
-} from '../../../../src/generated/server/worldmonitor/wildfire/v1/service_server';
+	WildfireServiceHandler,
+	ServerContext,
+	ListFireDetectionsRequest,
+	ListFireDetectionsResponse,
+} from "../../../../src/generated/server/worldmonitor/wildfire/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
+import { getCachedJson } from "../../../_shared/redis";
 
-const SEED_CACHE_KEY = 'wildfire:fires:v1';
+const SEED_CACHE_KEY = "wildfire:fires:v1";
 
-export const listFireDetections: WildfireServiceHandler['listFireDetections'] = async (
-  _ctx: ServerContext,
-  _req: ListFireDetectionsRequest,
+export const listFireDetections: WildfireServiceHandler["listFireDetections"] = async (
+	_ctx: ServerContext,
+	_req: ListFireDetectionsRequest,
 ): Promise<ListFireDetectionsResponse> => {
-  try {
-    const result = await getCachedJson(SEED_CACHE_KEY, true) as ListFireDetectionsResponse | null;
-    return result || { fireDetections: [], pagination: undefined };
-  } catch {
-    return { fireDetections: [], pagination: undefined };
-  }
+	try {
+		const result = (await getCachedJson(SEED_CACHE_KEY, true)) as ListFireDetectionsResponse | null;
+		return result || { fireDetections: [], pagination: undefined };
+	} catch {
+		return { fireDetections: [], pagination: undefined };
+	}
 };

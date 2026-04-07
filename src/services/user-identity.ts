@@ -26,10 +26,10 @@
  * @see https://github.com/koala73/worldmonitor/issues/2078
  */
 
-import { getCurrentClerkUser } from './clerk';
+import { getCurrentClerkUser } from "./clerk";
 
-const LEGACY_PRO_KEY = 'wm-pro-key';
-const ANON_KEY = 'wm-anon-id';
+const LEGACY_PRO_KEY = "wm-pro-key";
+const ANON_KEY = "wm-anon-id";
 
 /**
  * Returns (or creates) a stable anonymous ID for this browser.
@@ -38,17 +38,17 @@ const ANON_KEY = 'wm-anon-id';
  * webhook identity bridge, even before the user has authenticated.
  */
 export function getOrCreateAnonId(): string {
-  try {
-    let id = localStorage.getItem(ANON_KEY);
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem(ANON_KEY, id);
-    }
-    return id;
-  } catch {
-    // SSR or restricted context — return a one-off UUID
-    return crypto.randomUUID();
-  }
+	try {
+		let id = localStorage.getItem(ANON_KEY);
+		if (!id) {
+			id = crypto.randomUUID();
+			localStorage.setItem(ANON_KEY, id);
+		}
+		return id;
+	} catch {
+		// SSR or restricted context — return a one-off UUID
+		return crypto.randomUUID();
+	}
 }
 
 /**
@@ -58,18 +58,20 @@ export function getOrCreateAnonId(): string {
  * reading localStorage keys.
  */
 export function getUserId(): string | null {
-  // 1. Clerk auth — returns real Clerk user ID when signed in
-  const clerkUser = getCurrentClerkUser();
-  if (clerkUser?.id) return clerkUser.id;
+	// 1. Clerk auth — returns real Clerk user ID when signed in
+	const clerkUser = getCurrentClerkUser();
+	if (clerkUser?.id) return clerkUser.id;
 
-  // 2. Legacy wm-pro-key
-  try {
-    const proKey = localStorage.getItem(LEGACY_PRO_KEY);
-    if (proKey) return proKey;
-  } catch { /* SSR or restricted context */ }
+	// 2. Legacy wm-pro-key
+	try {
+		const proKey = localStorage.getItem(LEGACY_PRO_KEY);
+		if (proKey) return proKey;
+	} catch {
+		/* SSR or restricted context */
+	}
 
-  // 3. Stable anonymous ID — always available
-  return getOrCreateAnonId();
+	// 3. Stable anonymous ID — always available
+	return getOrCreateAnonId();
 }
 
 /**
@@ -77,14 +79,14 @@ export function getUserId(): string | null {
  * Checks for Clerk auth or legacy pro key — not the auto-generated anon ID.
  */
 export function hasUserIdentity(): boolean {
-  // 1. Clerk auth
-  const clerkUser = getCurrentClerkUser();
-  if (clerkUser?.id) return true;
+	// 1. Clerk auth
+	const clerkUser = getCurrentClerkUser();
+	if (clerkUser?.id) return true;
 
-  // 2. Legacy pro key
-  try {
-    return !!localStorage.getItem(LEGACY_PRO_KEY);
-  } catch {
-    return false;
-  }
+	// 2. Legacy pro key
+	try {
+		return !!localStorage.getItem(LEGACY_PRO_KEY);
+	} catch {
+		return false;
+	}
 }

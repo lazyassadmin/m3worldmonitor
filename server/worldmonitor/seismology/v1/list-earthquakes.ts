@@ -4,28 +4,28 @@
  */
 
 import type {
-  SeismologyServiceHandler,
-  ServerContext,
-  ListEarthquakesRequest,
-  ListEarthquakesResponse,
-} from '../../../../src/generated/server/worldmonitor/seismology/v1/service_server';
+	SeismologyServiceHandler,
+	ServerContext,
+	ListEarthquakesRequest,
+	ListEarthquakesResponse,
+} from "../../../../src/generated/server/worldmonitor/seismology/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
+import { getCachedJson } from "../../../_shared/redis";
 
-const SEED_CACHE_KEY = 'seismology:earthquakes:v1';
+const SEED_CACHE_KEY = "seismology:earthquakes:v1";
 
-type EarthquakeCache = { earthquakes: ListEarthquakesResponse['earthquakes'] };
+type EarthquakeCache = { earthquakes: ListEarthquakesResponse["earthquakes"] };
 
-export const listEarthquakes: SeismologyServiceHandler['listEarthquakes'] = async (
-  _ctx: ServerContext,
-  req: ListEarthquakesRequest,
+export const listEarthquakes: SeismologyServiceHandler["listEarthquakes"] = async (
+	_ctx: ServerContext,
+	req: ListEarthquakesRequest,
 ): Promise<ListEarthquakesResponse> => {
-  const pageSize = req.pageSize || 500;
-  try {
-    const seedData = await getCachedJson(SEED_CACHE_KEY, true) as EarthquakeCache | null;
-    const earthquakes = seedData?.earthquakes || [];
-    return { earthquakes: earthquakes.slice(0, pageSize), pagination: undefined };
-  } catch {
-    return { earthquakes: [], pagination: undefined };
-  }
+	const pageSize = req.pageSize || 500;
+	try {
+		const seedData = (await getCachedJson(SEED_CACHE_KEY, true)) as EarthquakeCache | null;
+		const earthquakes = seedData?.earthquakes || [];
+		return { earthquakes: earthquakes.slice(0, pageSize), pagination: undefined };
+	} catch {
+		return { earthquakes: [], pagination: undefined };
+	}
 };

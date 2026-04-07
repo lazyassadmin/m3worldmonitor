@@ -7,8 +7,8 @@ const PROBE_TIMEOUT_MS = 2_000;
 const CACHE_TTL_MS = 60_000; // re-probe every 60s
 
 interface HealthEntry {
-  available: boolean;
-  checkedAt: number;
+	available: boolean;
+	checkedAt: number;
 }
 
 const cache = new Map<string, HealthEntry>();
@@ -20,16 +20,16 @@ const inFlight = new Map<string, Promise<boolean>>();
  * return 200 or 404 on root, either confirms reachability).
  */
 async function probe(url: string): Promise<boolean> {
-  try {
-    const origin = new URL(url).origin;
-    await fetch(origin, {
-      method: 'GET',
-      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
-    });
-    return true;
-  } catch {
-    return false;
-  }
+	try {
+		const origin = new URL(url).origin;
+		await fetch(origin, {
+			method: "GET",
+			signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+		});
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 /**
@@ -38,26 +38,26 @@ async function probe(url: string): Promise<boolean> {
  * Otherwise probes and caches the result.
  */
 export async function isProviderAvailable(apiUrl: string): Promise<boolean> {
-  const origin = new URL(apiUrl).origin;
-  const cached = cache.get(origin);
-  if (cached && Date.now() - cached.checkedAt < CACHE_TTL_MS) {
-    return cached.available;
-  }
+	const origin = new URL(apiUrl).origin;
+	const cached = cache.get(origin);
+	if (cached && Date.now() - cached.checkedAt < CACHE_TTL_MS) {
+		return cached.available;
+	}
 
-  // Coalesce concurrent probes to the same origin
-  const existing = inFlight.get(origin);
-  if (existing) return existing;
+	// Coalesce concurrent probes to the same origin
+	const existing = inFlight.get(origin);
+	if (existing) return existing;
 
-  const promise = probe(apiUrl).then(available => {
-    cache.set(origin, { available, checkedAt: Date.now() });
-    inFlight.delete(origin);
-    if (!available) {
-      console.warn(`[llm-health] Provider unreachable: ${origin}`);
-    }
-    return available;
-  });
-  inFlight.set(origin, promise);
-  return promise;
+	const promise = probe(apiUrl).then((available) => {
+		cache.set(origin, { available, checkedAt: Date.now() });
+		inFlight.delete(origin);
+		if (!available) {
+			console.warn(`[llm-health] Provider unreachable: ${origin}`);
+		}
+		return available;
+	});
+	inFlight.set(origin, promise);
+	return promise;
 }
 
 /**
@@ -65,11 +65,11 @@ export async function isProviderAvailable(apiUrl: string): Promise<boolean> {
  * Used by /api/health to expose LLM status.
  */
 export function getLlmHealthStatus(): Record<string, { available: boolean; checkedAt: number }> {
-  const status: Record<string, { available: boolean; checkedAt: number }> = {};
-  for (const [origin, entry] of cache) {
-    status[origin] = { available: entry.available, checkedAt: entry.checkedAt };
-  }
-  return status;
+	const status: Record<string, { available: boolean; checkedAt: number }> = {};
+	for (const [origin, entry] of cache) {
+		status[origin] = { available: entry.available, checkedAt: entry.checkedAt };
+	}
+	return status;
 }
 
 /**
@@ -77,11 +77,13 @@ export function getLlmHealthStatus(): Record<string, { available: boolean; check
  * Called on startup or when a provider comes back online.
  */
 export async function reprobeAll(): Promise<void> {
-  const origins = [...cache.keys()];
-  await Promise.all(origins.map(async (origin) => {
-    const available = await probe(origin);
-    cache.set(origin, { available, checkedAt: Date.now() });
-  }));
+	const origins = [...cache.keys()];
+	await Promise.all(
+		origins.map(async (origin) => {
+			const available = await probe(origin);
+			cache.set(origin, { available, checkedAt: Date.now() });
+		}),
+	);
 }
 
 /**
@@ -89,21 +91,22 @@ export async function reprobeAll(): Promise<void> {
  * Fire-and-forget — does not block the caller.
  */
 export function warmHealthCache(): void {
-  const providerUrls: string[] = [];
+	const providerUrls: string[] = [];
 
-  const ollamaUrl = typeof process !== 'undefined'
-    ? (process.env?.OLLAMA_API_URL || process.env?.LLM_API_URL)
-    : undefined;
-  if (ollamaUrl) providerUrls.push(ollamaUrl);
+	const ollamaUrl =
+		typeof process !== "undefined"
+			? process.env?.OLLAMA_API_URL || process.env?.LLM_API_URL
+			: undefined;
+	if (ollamaUrl) providerUrls.push(ollamaUrl);
 
-  if (typeof process !== 'undefined' && process.env?.GROQ_API_KEY) {
-    providerUrls.push('https://api.groq.com/openai/v1/chat/completions');
-  }
-  if (typeof process !== 'undefined' && process.env?.OPENROUTER_API_KEY) {
-    providerUrls.push('https://openrouter.ai/api/v1/chat/completions');
-  }
+	if (typeof process !== "undefined" && process.env?.GROQ_API_KEY) {
+		providerUrls.push("https://api.groq.com/openai/v1/chat/completions");
+	}
+	if (typeof process !== "undefined" && process.env?.OPENROUTER_API_KEY) {
+		providerUrls.push("https://openrouter.ai/api/v1/chat/completions");
+	}
 
-  for (const url of providerUrls) {
-    void isProviderAvailable(url);
-  }
+	for (const url of providerUrls) {
+		void isProviderAvailable(url);
+	}
 }

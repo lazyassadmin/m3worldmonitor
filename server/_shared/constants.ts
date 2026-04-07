@@ -1,8 +1,14 @@
-export const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+export const CHROME_UA =
+	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-export function clampInt(value: number | undefined, fallback: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) return fallback;
-  return Math.max(min, Math.min(max, Math.floor(value as number)));
+export function clampInt(
+	value: number | undefined,
+	fallback: number,
+	min: number,
+	max: number,
+): number {
+	if (!Number.isFinite(value)) return fallback;
+	return Math.max(min, Math.min(max, Math.floor(value as number)));
 }
 
 /**
@@ -15,14 +21,14 @@ const YAHOO_MIN_GAP_MS = 600;
 let yahooQueue: Promise<void> = Promise.resolve();
 
 export function yahooGate(): Promise<void> {
-  yahooQueue = yahooQueue.then(async () => {
-    const elapsed = Date.now() - yahooLastRequest;
-    if (elapsed < YAHOO_MIN_GAP_MS) {
-      await new Promise<void>(r => setTimeout(r, YAHOO_MIN_GAP_MS - elapsed));
-    }
-    yahooLastRequest = Date.now();
-  });
-  return yahooQueue;
+	yahooQueue = yahooQueue.then(async () => {
+		const elapsed = Date.now() - yahooLastRequest;
+		if (elapsed < YAHOO_MIN_GAP_MS) {
+			await new Promise<void>((r) => setTimeout(r, YAHOO_MIN_GAP_MS - elapsed));
+		}
+		yahooLastRequest = Date.now();
+	});
+	return yahooQueue;
 }
 
 /**
@@ -35,12 +41,12 @@ const FINNHUB_MIN_GAP_MS = 350;
 let finnhubQueue: Promise<void> = Promise.resolve();
 
 export function finnhubGate(): Promise<void> {
-  finnhubQueue = finnhubQueue.then(async () => {
-    const elapsed = Date.now() - finnhubLastRequest;
-    if (elapsed < FINNHUB_MIN_GAP_MS) {
-      await new Promise<void>(r => setTimeout(r, FINNHUB_MIN_GAP_MS - elapsed));
-    }
-    finnhubLastRequest = Date.now();
-  });
-  return finnhubQueue;
+	finnhubQueue = finnhubQueue.then(async () => {
+		const elapsed = Date.now() - finnhubLastRequest;
+		if (elapsed < FINNHUB_MIN_GAP_MS) {
+			await new Promise<void>((r) => setTimeout(r, FINNHUB_MIN_GAP_MS - elapsed));
+		}
+		finnhubLastRequest = Date.now();
+	});
+	return finnhubQueue;
 }

@@ -1,8 +1,8 @@
-import type { Sector, Commodity, MarketSymbol } from '@/types';
-import cryptoConfig from '../../shared/crypto.json';
-import sectorConfig from '../../shared/sectors.json';
-import commodityConfig from '../../shared/commodities.json';
-import stocksConfig from '../../shared/stocks.json';
+import type { Sector, Commodity, MarketSymbol } from "@/types";
+import cryptoConfig from "../../shared/crypto.json";
+import sectorConfig from "../../shared/sectors.json";
+import commodityConfig from "../../shared/commodities.json";
+import stocksConfig from "../../shared/stocks.json";
 
 export const SECTORS: Sector[] = sectorConfig.sectors as Sector[];
 

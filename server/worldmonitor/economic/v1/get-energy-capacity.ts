@@ -4,27 +4,27 @@
  */
 
 import type {
-  ServerContext,
-  GetEnergyCapacityRequest,
-  GetEnergyCapacityResponse,
-} from '../../../../src/generated/server/worldmonitor/economic/v1/service_server';
+	ServerContext,
+	GetEnergyCapacityRequest,
+	GetEnergyCapacityResponse,
+} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
 
-import { getCachedJson } from '../../../_shared/redis';
+import { getCachedJson } from "../../../_shared/redis";
 
-const SEED_CACHE_KEY = 'economic:capacity:v1:COL,SUN,WND:20';
+const SEED_CACHE_KEY = "economic:capacity:v1:COL,SUN,WND:20";
 
 export async function getEnergyCapacity(
-  _ctx: ServerContext,
-  req: GetEnergyCapacityRequest,
+	_ctx: ServerContext,
+	req: GetEnergyCapacityRequest,
 ): Promise<GetEnergyCapacityResponse> {
-  try {
-    const result = await getCachedJson(SEED_CACHE_KEY, true) as GetEnergyCapacityResponse | null;
-    if (!result?.series?.length) return { series: [] };
-    if (req.energySources.length > 0) {
-      return { series: result.series.filter(s => req.energySources.includes(s.energySource)) };
-    }
-    return result;
-  } catch {
-    return { series: [] };
-  }
+	try {
+		const result = (await getCachedJson(SEED_CACHE_KEY, true)) as GetEnergyCapacityResponse | null;
+		if (!result?.series?.length) return { series: [] };
+		if (req.energySources.length > 0) {
+			return { series: result.series.filter((s) => req.energySources.includes(s.energySource)) };
+		}
+		return result;
+	} catch {
+		return { series: [] };
+	}
 }

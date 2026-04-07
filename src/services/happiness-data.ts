@@ -10,9 +10,9 @@
  */
 
 export interface HappinessData {
-  year: number;
-  source: string;
-  scores: Map<string, number>; // ISO-2 code -> Cantril Ladder score (0-10)
+	year: number;
+	source: string;
+	scores: Map<string, number>; // ISO-2 code -> Cantril Ladder score (0-10)
 }
 
 /**
@@ -20,10 +20,10 @@ export interface HappinessData {
  * Uses dynamic import for code-splitting (JSON only loaded for happy variant).
  */
 export async function fetchHappinessScores(): Promise<HappinessData> {
-  const { default: raw } = await import('@/data/world-happiness.json');
-  return {
-    year: raw.year,
-    source: raw.source,
-    scores: new Map(Object.entries(raw.scores)),
-  };
+	const { default: raw } = await import("@/data/world-happiness.json");
+	return {
+		year: raw.year,
+		source: raw.source,
+		scores: new Map(Object.entries(raw.scores)),
+	};
 }

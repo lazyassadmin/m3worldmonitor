@@ -3,151 +3,153 @@
 // source: worldmonitor/natural/v1/service.proto
 
 export interface ListNaturalEventsRequest {
-  days: number;
+	days: number;
 }
 
 export interface ListNaturalEventsResponse {
-  events: NaturalEvent[];
+	events: NaturalEvent[];
 }
 
 export interface NaturalEvent {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  categoryTitle: string;
-  lat: number;
-  lon: number;
-  date: number;
-  magnitude: number;
-  magnitudeUnit: string;
-  sourceUrl: string;
-  sourceName: string;
-  closed: boolean;
-  stormId?: string;
-  stormName?: string;
-  basin?: string;
-  stormCategory?: number;
-  classification?: string;
-  windKt?: number;
-  pressureMb?: number;
-  movementDir?: number;
-  movementSpeedKt?: number;
-  forecastTrack: ForecastPoint[];
-  conePolygon: CoordRing[];
-  pastTrack: PastTrackPoint[];
+	id: string;
+	title: string;
+	description: string;
+	category: string;
+	categoryTitle: string;
+	lat: number;
+	lon: number;
+	date: number;
+	magnitude: number;
+	magnitudeUnit: string;
+	sourceUrl: string;
+	sourceName: string;
+	closed: boolean;
+	stormId?: string;
+	stormName?: string;
+	basin?: string;
+	stormCategory?: number;
+	classification?: string;
+	windKt?: number;
+	pressureMb?: number;
+	movementDir?: number;
+	movementSpeedKt?: number;
+	forecastTrack: ForecastPoint[];
+	conePolygon: CoordRing[];
+	pastTrack: PastTrackPoint[];
 }
 
 export interface ForecastPoint {
-  lat: number;
-  lon: number;
-  hour: number;
-  windKt: number;
-  category: number;
+	lat: number;
+	lon: number;
+	hour: number;
+	windKt: number;
+	category: number;
 }
 
 export interface CoordRing {
-  points: Coordinate[];
+	points: Coordinate[];
 }
 
 export interface Coordinate {
-  lon: number;
-  lat: number;
+	lon: number;
+	lat: number;
 }
 
 export interface PastTrackPoint {
-  lat: number;
-  lon: number;
-  windKt: number;
-  timestamp: number;
+	lat: number;
+	lon: number;
+	windKt: number;
+	timestamp: number;
 }
 
 export interface FieldViolation {
-  field: string;
-  description: string;
+	field: string;
+	description: string;
 }
 
 export class ValidationError extends Error {
-  violations: FieldViolation[];
+	violations: FieldViolation[];
 
-  constructor(violations: FieldViolation[]) {
-    super("Validation failed");
-    this.name = "ValidationError";
-    this.violations = violations;
-  }
+	constructor(violations: FieldViolation[]) {
+		super("Validation failed");
+		this.name = "ValidationError";
+		this.violations = violations;
+	}
 }
 
 export class ApiError extends Error {
-  statusCode: number;
-  body: string;
+	statusCode: number;
+	body: string;
 
-  constructor(statusCode: number, message: string, body: string) {
-    super(message);
-    this.name = "ApiError";
-    this.statusCode = statusCode;
-    this.body = body;
-  }
+	constructor(statusCode: number, message: string, body: string) {
+		super(message);
+		this.name = "ApiError";
+		this.statusCode = statusCode;
+		this.body = body;
+	}
 }
 
 export interface NaturalServiceClientOptions {
-  fetch?: typeof fetch;
-  defaultHeaders?: Record<string, string>;
+	fetch?: typeof fetch;
+	defaultHeaders?: Record<string, string>;
 }
 
 export interface NaturalServiceCallOptions {
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
+	headers?: Record<string, string>;
+	signal?: AbortSignal;
 }
 
 export class NaturalServiceClient {
-  private baseURL: string;
-  private fetchFn: typeof fetch;
-  private defaultHeaders: Record<string, string>;
+	private baseURL: string;
+	private fetchFn: typeof fetch;
+	private defaultHeaders: Record<string, string>;
 
-  constructor(baseURL: string, options?: NaturalServiceClientOptions) {
-    this.baseURL = baseURL.replace(/\/+$/, "");
-    this.fetchFn = options?.fetch ?? globalThis.fetch;
-    this.defaultHeaders = { ...options?.defaultHeaders };
-  }
+	constructor(baseURL: string, options?: NaturalServiceClientOptions) {
+		this.baseURL = baseURL.replace(/\/+$/, "");
+		this.fetchFn = options?.fetch ?? globalThis.fetch;
+		this.defaultHeaders = { ...options?.defaultHeaders };
+	}
 
-  async listNaturalEvents(req: ListNaturalEventsRequest, options?: NaturalServiceCallOptions): Promise<ListNaturalEventsResponse> {
-    let path = "/api/natural/v1/list-natural-events";
-    const params = new URLSearchParams();
-    if (req.days != null && req.days !== 0) params.set("days", String(req.days));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+	async listNaturalEvents(
+		req: ListNaturalEventsRequest,
+		options?: NaturalServiceCallOptions,
+	): Promise<ListNaturalEventsResponse> {
+		let path = "/api/natural/v1/list-natural-events";
+		const params = new URLSearchParams();
+		if (req.days != null && req.days !== 0) params.set("days", String(req.days));
+		const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+			...this.defaultHeaders,
+			...options?.headers,
+		};
 
-    const resp = await this.fetchFn(url, {
-      method: "GET",
-      headers,
-      signal: options?.signal,
-    });
+		const resp = await this.fetchFn(url, {
+			method: "GET",
+			headers,
+			signal: options?.signal,
+		});
 
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
+		if (!resp.ok) {
+			return this.handleError(resp);
+		}
 
-    return await resp.json() as ListNaturalEventsResponse;
-  }
+		return (await resp.json()) as ListNaturalEventsResponse;
+	}
 
-  private async handleError(resp: Response): Promise<never> {
-    const body = await resp.text();
-    if (resp.status === 400) {
-      try {
-        const parsed = JSON.parse(body);
-        if (parsed.violations) {
-          throw new ValidationError(parsed.violations);
-        }
-      } catch (e) {
-        if (e instanceof ValidationError) throw e;
-      }
-    }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
-  }
+	private async handleError(resp: Response): Promise<never> {
+		const body = await resp.text();
+		if (resp.status === 400) {
+			try {
+				const parsed = JSON.parse(body);
+				if (parsed.violations) {
+					throw new ValidationError(parsed.violations);
+				}
+			} catch (e) {
+				if (e instanceof ValidationError) throw e;
+			}
+		}
+		throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+	}
 }
-
