@@ -54,10 +54,13 @@ async def run_all_once(*, score: bool = True) -> dict[str, int]:
         )
 
     if score:
+        from poliwatch.alerts.notifier import dispatch_pending_alerts
         from poliwatch.analysis.scoring import rescore_recent_trades
 
         with session_scope() as db:
             results["scored"] = rescore_recent_trades(db)
+        with session_scope() as db:
+            results["alerts_sent"] = dispatch_pending_alerts(db)
 
     logger.info("ingestion summary: {}", results)
     return results
