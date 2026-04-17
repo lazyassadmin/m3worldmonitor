@@ -71,6 +71,9 @@ def upsert_trade(
 
     Returns (trade, created_flag).
     """
+    # Flush pending inserts so identical back-to-back calls in one session
+    # find their own prior write (we run with autoflush=False).
+    db.flush()
     stmt = select(StockTrade).where(
         StockTrade.member_id == member_id,
         StockTrade.ticker == ticker,
