@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    command: python -m poliwatch.cli serve
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - poliwatch_data:/app/data
+    depends_on:
+      - ingest
+    restart: unless-stopped
+
+  dashboard:
+    build: .
+    command: python -m streamlit run poliwatch/dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    env_file: .env
+    volumes:
+      - poliwatch_data:/app/data
+    restart: unless-stopped
+
+  ingest:
+    build: .
+    command: python -m poliwatch.cli ingest --schedule
+    env_file: .env
+    volumes:
+      - poliwatch_data:/app/data
+    restart: unless-stopped
+
+  # Optional: replace SQLite with PostgreSQL
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: poliwatch
+  #     POSTGRES_USER: poliwatch
+  #     POSTGRES_PASSWORD: secret
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  poliwatch_data:
+  # pg_data:
