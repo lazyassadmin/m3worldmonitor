@@ -1,0 +1,175 @@
+{
+  "technology": {
+    "keywords": ["technology", "software", "semiconductor", "computing", "internet", "artificial intelligence", "cybersecurity", "cloud computing", "data privacy", "social media", "telecommunications"],
+    "tickers": {
+      "AAPL": ["apple", "apple inc"],
+      "MSFT": ["microsoft"],
+      "GOOGL": ["alphabet", "google"],
+      "GOOG": ["alphabet", "google"],
+      "META": ["meta platforms", "facebook", "instagram"],
+      "AMZN": ["amazon"],
+      "NVDA": ["nvidia"],
+      "AMD": ["advanced micro devices"],
+      "INTC": ["intel"],
+      "TSM": ["taiwan semiconductor"],
+      "AVGO": ["broadcom"],
+      "QCOM": ["qualcomm"],
+      "ORCL": ["oracle"],
+      "CRM": ["salesforce"],
+      "ADBE": ["adobe"],
+      "CSCO": ["cisco"],
+      "IBM": ["international business machines"],
+      "NOW": ["servicenow"],
+      "PLTR": ["palantir"],
+      "SNOW": ["snowflake"]
+    }
+  },
+  "defense": {
+    "keywords": ["armed forces", "defense", "military", "national security", "weapons", "missile", "navy", "air force", "army", "veterans"],
+    "tickers": {
+      "LMT": ["lockheed martin"],
+      "RTX": ["raytheon", "rtx corporation"],
+      "GD": ["general dynamics"],
+      "NOC": ["northrop grumman"],
+      "BA": ["boeing"],
+      "LHX": ["l3harris"],
+      "HII": ["huntington ingalls"],
+      "TDG": ["transdigm"],
+      "LDOS": ["leidos"],
+      "KTOS": ["kratos"]
+    }
+  },
+  "healthcare": {
+    "keywords": ["health", "healthcare", "medicare", "medicaid", "prescription drug", "pharmaceutical", "biotech", "vaccine", "public health", "medical device", "hospital"],
+    "tickers": {
+      "JNJ": ["johnson & johnson", "johnson and johnson"],
+      "PFE": ["pfizer"],
+      "MRK": ["merck"],
+      "ABBV": ["abbvie"],
+      "LLY": ["eli lilly", "lilly"],
+      "UNH": ["unitedhealth", "united health"],
+      "CVS": ["cvs health"],
+      "CI": ["cigna"],
+      "HUM": ["humana"],
+      "GILD": ["gilead"],
+      "AMGN": ["amgen"],
+      "BMY": ["bristol-myers", "bristol myers"],
+      "MRNA": ["moderna"],
+      "BNTX": ["biontech"],
+      "REGN": ["regeneron"],
+      "VRTX": ["vertex pharmaceuticals"],
+      "ISRG": ["intuitive surgical"],
+      "MDT": ["medtronic"],
+      "TMO": ["thermo fisher"],
+      "DHR": ["danaher"]
+    }
+  },
+  "financial": {
+    "keywords": ["banking", "finance", "securities", "capital markets", "financial services", "insurance", "credit", "consumer protection", "dodd-frank"],
+    "tickers": {
+      "JPM": ["jpmorgan", "jp morgan"],
+      "BAC": ["bank of america"],
+      "WFC": ["wells fargo"],
+      "C": ["citigroup"],
+      "GS": ["goldman sachs"],
+      "MS": ["morgan stanley"],
+      "BLK": ["blackrock"],
+      "SCHW": ["charles schwab", "schwab"],
+      "AXP": ["american express"],
+      "V": ["visa inc"],
+      "MA": ["mastercard"],
+      "PYPL": ["paypal"],
+      "COF": ["capital one"],
+      "USB": ["u.s. bancorp", "us bancorp"],
+      "PNC": ["pnc financial"],
+      "AIG": ["american international group"],
+      "MET": ["metlife"],
+      "PRU": ["prudential financial"]
+    }
+  },
+  "energy": {
+    "keywords": ["energy", "oil", "gas", "petroleum", "fossil fuel", "pipeline", "drilling", "offshore", "lng", "renewable energy", "climate"],
+    "tickers": {
+      "XOM": ["exxon mobil", "exxonmobil"],
+      "CVX": ["chevron"],
+      "COP": ["conocophillips"],
+      "EOG": ["eog resources"],
+      "SLB": ["schlumberger"],
+      "PSX": ["phillips 66"],
+      "VLO": ["valero"],
+      "MPC": ["marathon petroleum"],
+      "OXY": ["occidental petroleum"],
+      "PXD": ["pioneer natural resources"],
+      "HAL": ["halliburton"],
+      "BKR": ["baker hughes"],
+      "KMI": ["kinder morgan"],
+      "WMB": ["williams companies"],
+      "LNG": ["cheniere energy"]
+    }
+  },
+  "clean_energy": {
+    "keywords": ["solar", "wind", "electric vehicle", "battery", "clean energy", "renewable", "nuclear energy"],
+    "tickers": {
+      "TSLA": ["tesla"],
+      "ENPH": ["enphase energy"],
+      "FSLR": ["first solar"],
+      "SEDG": ["solaredge"],
+      "NEE": ["nextera energy"],
+      "PLUG": ["plug power"],
+      "BE": ["bloom energy"],
+      "RIVN": ["rivian"],
+      "LCID": ["lucid group"]
+    }
+  },
+  "consumer": {
+    "keywords": ["consumer protection", "retail", "e-commerce", "food safety", "agriculture"],
+    "tickers": {
+      "WMT": ["walmart"],
+      "TGT": ["target corporation"],
+      "COST": ["costco"],
+      "HD": ["home depot"],
+      "LOW": ["lowe's", "lowes"],
+      "NKE": ["nike"],
+      "SBUX": ["starbucks"],
+      "MCD": ["mcdonald's", "mcdonalds"],
+      "KO": ["coca-cola", "coca cola"],
+      "PEP": ["pepsico", "pepsi"],
+      "PG": ["procter & gamble", "procter and gamble"],
+      "DIS": ["walt disney", "disney"],
+      "NFLX": ["netflix"]
+    }
+  },
+  "transportation": {
+    "keywords": ["aviation", "airline", "transportation", "infrastructure", "highway", "rail", "shipping", "maritime"],
+    "tickers": {
+      "DAL": ["delta air lines"],
+      "UAL": ["united airlines"],
+      "AAL": ["american airlines"],
+      "LUV": ["southwest airlines"],
+      "UPS": ["united parcel service"],
+      "FDX": ["fedex"],
+      "UNP": ["union pacific"],
+      "CSX": ["csx corporation"],
+      "NSC": ["norfolk southern"]
+    }
+  },
+  "telecom": {
+    "keywords": ["telecommunications", "broadband", "5g", "spectrum", "net neutrality"],
+    "tickers": {
+      "T": ["at&t", "at and t"],
+      "VZ": ["verizon"],
+      "TMUS": ["t-mobile", "tmobile"],
+      "CMCSA": ["comcast"],
+      "CHTR": ["charter communications"]
+    }
+  },
+  "crypto": {
+    "keywords": ["cryptocurrency", "digital asset", "blockchain", "stablecoin"],
+    "tickers": {
+      "COIN": ["coinbase"],
+      "MSTR": ["microstrategy"],
+      "RIOT": ["riot platforms", "riot blockchain"],
+      "MARA": ["marathon digital"]
+    }
+  }
+}

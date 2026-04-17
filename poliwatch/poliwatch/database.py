@@ -65,6 +65,7 @@ def init_db() -> None:
         alert,
         bill,
         member,
+        source_health,
         trade,
         vote,
     )
