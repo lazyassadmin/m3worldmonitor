@@ -1,0 +1,50 @@
+services:
+  api:
+    build: .
+    command: python -m poliwatch.api.main
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  dashboard:
+    build: .
+    command: streamlit run poliwatch/dashboard/app.py --server.port=8501 --server.address=0.0.0.0
+    env_file:
+      - .env
+    ports:
+      - "${DASHBOARD_PORT:-8501}:8501"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  scheduler:
+    build: .
+    command: python -m poliwatch.ingestion.scheduler
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Optional Postgres — enable by setting DATABASE_URL in .env
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: poliwatch
+  #     POSTGRES_PASSWORD: poliwatch
+  #     POSTGRES_DB: poliwatch
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+# volumes:
+#   pgdata:

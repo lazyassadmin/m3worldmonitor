@@ -1,0 +1,72 @@
+[project]
+name = "poliwatch"
+version = "0.1.0"
+description = "Open-source political accountability dashboard — correlates congressional stock trades with legislation, committee assignments, and voting records."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [{ name = "PoliWatch Contributors" }]
+keywords = ["politics", "transparency", "stock-act", "congress", "accountability"]
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "streamlit>=1.40.0",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "httpx>=0.27.2",
+    "pandas>=2.2.3",
+    "numpy>=2.1.0",
+    "plotly>=5.24.0",
+    "apscheduler>=3.10.4",
+    "loguru>=0.7.2",
+    "python-dotenv>=1.0.1",
+    "lxml>=5.3.0",
+    "beautifulsoup4>=4.12.3",
+    "pypdf>=5.1.0",
+    "tenacity>=9.0.0",
+    "rapidfuzz>=3.10.0",
+    "psycopg2-binary>=2.9.10 ; sys_platform != 'win32'",
+    "psycopg[binary]>=3.2.3 ; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "respx>=0.21.1",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+]
+
+[project.scripts]
+poliwatch-api = "poliwatch.api.main:run"
+poliwatch-dashboard = "poliwatch.dashboard.app:run"
+poliwatch-scheduler = "poliwatch.ingestion.scheduler:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["poliwatch"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
